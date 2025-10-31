@@ -1,7 +1,6 @@
 package com.example.backend.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
@@ -67,9 +66,25 @@ public class JacksonConfig {
             }
             
             try {
-                // 首先尝试标准ISO格式
+                // 首先尝试标准ISO格式（包含T的格式）
                 if (text.contains("T")) {
-                    return LocalDateTime.parse(text);
+                    // 处理带时区的ISO格式（如：2025-10-30T02:16:09.806Z）
+                    // 移除时区信息（Z或+08:00等），保留日期时间部分
+                    String cleanedText = text;
+                    // 移除Z后缀（UTC时区）
+                    if (cleanedText.endsWith("Z")) {
+                        cleanedText = cleanedText.substring(0, cleanedText.length() - 1);
+                    }
+                    // 移除时区偏移（如+08:00, -05:00等）
+                    if (cleanedText.matches(".*[+-]\\d{2}:?\\d{2}$")) {
+                        cleanedText = cleanedText.replaceFirst("[+-]\\d{2}:?\\d{2}$", "");
+                    }
+                    // 移除毫秒部分（如果存在），因为LocalDateTime.parse可能不支持带毫秒的格式
+                    if (cleanedText.contains(".")) {
+                        int dotIndex = cleanedText.indexOf(".");
+                        cleanedText = cleanedText.substring(0, dotIndex);
+                    }
+                    return LocalDateTime.parse(cleanedText);
                 }
                 
                 // 尝试自定义格式 "yyyy-MM-dd HH:mm:ss"

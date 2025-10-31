@@ -11,7 +11,7 @@ import com.example.backend.entity.KnowledgeResources;
 import com.example.backend.entity.Chapter;
 import com.example.backend.entity.ResourceForm;
 import com.example.backend.entity.ChapterResources;
-import com.example.backend.entity.UserPreference;
+
 import com.example.backend.entity.Tag;
 import com.example.backend.mapper.PluginMapper;
 import com.example.backend.mapper.KnowledgesMapper;
@@ -22,7 +22,6 @@ import com.example.backend.mapper.KnowledgeResourcesMapper;
 import com.example.backend.mapper.ChapterMapper;
 import com.example.backend.mapper.ResourceFormMapper;
 import com.example.backend.mapper.ChapterResourcesMapper;
-import com.example.backend.mapper.UserPreferenceMapper;
 import com.example.backend.mapper.TagsMapper;
 import com.example.backend.service.admin.resource_manage.ResourceService;
 import com.example.backend.service.admin.resource_manage.PluginService;
@@ -97,8 +96,6 @@ public class ResourceServiceImpl implements ResourceService, PluginService {
     @Autowired
     private ChapterResourcesMapper chapterResourcesMapper;
 
-    @Autowired
-    private UserPreferenceMapper userPreferenceMapper;
 
     @Autowired
     private TagsMapper tagsMapper;
@@ -315,12 +312,6 @@ public class ResourceServiceImpl implements ResourceService, PluginService {
             deletePluginFiles(pluginKey);
             
             // 2. 删除数据库中的相关记录（按依赖关系顺序删除）
-            // 2.1 删除用户偏好表（依赖resource_form）
-            int userPreferenceDeleted = userPreferenceMapper.delete(
-                new LambdaQueryWrapper<UserPreference>()
-                    .inSql(UserPreference::getFormId, 
-                        "SELECT form_id FROM resource_form WHERE plugin_key = '" + pluginKey + "'")
-            );
             
             // 2.2 删除知识点-资源关联表（依赖knowledge、media/items）
             int knowledgeResourcesDeleted = knowledgeResourcesMapper.delete(
@@ -380,7 +371,7 @@ public class ResourceServiceImpl implements ResourceService, PluginService {
             );
             
             log.info("数据库记录删除完成 - 用户偏好: {}, 知识点资源关联: {}, 章节资源关联: {}, 资源标签关联: {}, 标签: {}, 媒体资源: {}, 习题: {}, 章节: {}, 知识点: {}, 资源形式: {}", 
-                userPreferenceDeleted, knowledgeResourcesDeleted, chapterResourcesDeleted, resourceTagDeleted, tagDeleted,
+                knowledgeResourcesDeleted, chapterResourcesDeleted, resourceTagDeleted, tagDeleted,
                 mediaAssetsDeleted, itemsDeleted, chaptersDeleted, knowledgeDeleted, resourceFormDeleted);
             
             log.info("插件资源删除完成: {}", pluginKey);

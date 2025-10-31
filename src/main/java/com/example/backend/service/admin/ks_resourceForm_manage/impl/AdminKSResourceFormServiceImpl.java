@@ -71,6 +71,9 @@ public class AdminKSResourceFormServiceImpl implements AdminKSResourceFormServic
                     );
                 }
             }
+            
+            // 按ID升序排列
+            queryWrapper.orderByAsc("id");
 
             // 分页查询
             if (req != null && req.getPageSize() != null && req.getPageSize() > 0) {

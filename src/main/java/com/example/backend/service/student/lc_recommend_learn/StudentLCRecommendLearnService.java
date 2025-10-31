@@ -1,5 +1,11 @@
 package com.example.backend.service.student.lc_recommend_learn;
 
+import com.example.backend.common.Result;
+import com.example.backend.controller.student.dto.StudentLCRecommendLearnRecodeDto;
+import com.example.backend.controller.student.dto.StudentLCRecommendLearnResourceDto;
+
+import java.util.List;
+
 /**
  * ClassName: StudentRecommendLearnService
  * Package: com.example.backend.service.student
@@ -11,4 +17,7 @@ package com.example.backend.service.student.lc_recommend_learn;
  */
 
 public interface StudentLCRecommendLearnService {
+    Result getRecommendLearnResource(List<StudentLCRecommendLearnResourceDto> datas);
+
+    Result recode(StudentLCRecommendLearnRecodeDto req);
 }

@@ -19,6 +19,11 @@ public class Result<T> {
         this.data = data;
     }
 
+    public static <T> Result<T> success() {
+
+        return new Result<>(true, "操作成功", null);
+    }
+
     public static <T> Result<T> success(T data) {
 
         return new Result<>(true, "操作成功", data);
@@ -38,4 +43,5 @@ public class Result<T> {
 
         return new Result<>(false, message, data);
     }
+
 } 
