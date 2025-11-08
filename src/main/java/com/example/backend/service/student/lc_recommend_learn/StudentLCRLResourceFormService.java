@@ -9,6 +9,6 @@ package com.example.backend.service.student.lc_recommend_learn;
  * @Create 2025/10/31 9:16
  * @Version 1.0
  */
-public interface StudentLCResourceFormService {
+public interface StudentLCRLResourceFormService {
     String getResourceType(String formKey);
 }

@@ -1,15 +1,15 @@
-package com.example.backend.service.student.lc_recommend_learn;
+package com.example.backend.service.student.lc_autonomous_learn;
 
 import com.example.backend.common.Result;
-import com.example.backend.controller.student.dto.StudentLCRecommendLearnResourceDto;
+import com.example.backend.controller.student.dto.StudentLCRLRecommendLearnResourceDto;
 
 import java.util.List;
 
 /**
  * Python模型API服务接口
  */
-public interface StudentLCPyModelApiService {
-    Result<List<StudentLCRecommendLearnResourceDto>> getRecommendations(String userKey);
+public interface StudentLCALPyModelApiService {
+    Result<List<StudentLCRLRecommendLearnResourceDto>> getRecommendations(String userKey);
     
     /**
      * 标记用户推荐资源为已使用

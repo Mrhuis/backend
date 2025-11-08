@@ -1,12 +1,12 @@
-package com.example.backend.service.student.lc_recommend_learn.impl;
+package com.example.backend.service.student.lc_autonomous_learn.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.backend.entity.KnowledgeResources;
 import com.example.backend.mapper.KnowledgeResourcesMapper;
-import com.example.backend.service.student.lc_recommend_learn.StudentLCKnowledgeResourcesService;
+import com.example.backend.service.student.lc_autonomous_learn.StudentLCALKnowledgeResourcesService;
+import com.example.backend.service.student.lc_recommend_learn.StudentLCRLKnowledgeResourcesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * @Version 1.0
  */
 @Service
-public class StudentLCKnowledgeResourcesServiceImpl implements StudentLCKnowledgeResourcesService {
+public class StudentLCALKnowledgeResourcesServiceImpl implements StudentLCALKnowledgeResourcesService {
     
     @Autowired
     private KnowledgeResourcesMapper knowledgeResourcesMapper;

@@ -1,10 +1,10 @@
 package com.example.backend.service.student.lc_recommend_learn.impl;
 
 import com.example.backend.common.Result;
-import com.example.backend.controller.student.dto.StudentLCRecommendLearnResourceDto;
+import com.example.backend.controller.student.dto.StudentLCRLRecommendLearnResourceDto;
 import com.example.backend.entity.ResourceForm;
 import com.example.backend.mapper.ResourceFormMapper;
-import com.example.backend.service.student.lc_recommend_learn.StudentLCPyModelApiService;
+import com.example.backend.service.student.lc_recommend_learn.StudentLCRLPyModelApiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ import java.util.Map;
  * Python模型API服务实现类
  */
 @Service
-public class StudentLCPyModelApiServiceImpl implements StudentLCPyModelApiService {
+public class StudentLCRLPyModelApiServiceImpl implements StudentLCRLPyModelApiService {
 
     @Autowired
     private ResourceFormMapper resourceFormMapper;
@@ -33,7 +33,7 @@ public class StudentLCPyModelApiServiceImpl implements StudentLCPyModelApiServic
      * @return 封装后的Result对象
      */
     @Override
-    public Result<List<StudentLCRecommendLearnResourceDto>> getRecommendations(String userKey) {
+    public Result<List<StudentLCRLRecommendLearnResourceDto>> getRecommendations(String userKey) {
         RestTemplate restTemplate = new RestTemplate();
 
         try {
@@ -51,11 +51,11 @@ public class StudentLCPyModelApiServiceImpl implements StudentLCPyModelApiServic
                     if (success) {
                         // 解析数据部分
                         List<Map<String, Object>> rawData = (List<Map<String, Object>>) responseBody.get("data");
-                        List<StudentLCRecommendLearnResourceDto> resourceList = new ArrayList<>();
+                        List<StudentLCRLRecommendLearnResourceDto> resourceList = new ArrayList<>();
                         
                         // 转换为DTO对象列表
                         for (Map<String, Object> item : rawData) {
-                            StudentLCRecommendLearnResourceDto resource = new StudentLCRecommendLearnResourceDto();
+                            StudentLCRLRecommendLearnResourceDto resource = new StudentLCRLRecommendLearnResourceDto();
                             resource.setFormId((Integer) item.get("form_id"));
                             resource.setResourceKey((String) item.get("resource_key"));
                             resourceList.add(resource);

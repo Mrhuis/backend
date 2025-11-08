@@ -2,10 +2,10 @@ package com.example.backend.service.student.lc_recommend_learn.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.backend.common.Result;
-import com.example.backend.controller.student.dto.StudentLCRecommendLearnRecodeDto;
+import com.example.backend.controller.student.dto.StudentLCRLRecommendLearnRecodeDto;
 import com.example.backend.entity.UserKnowledgeStats20d;
 import com.example.backend.mapper.UserKnowledgeStats20dMapper;
-import com.example.backend.service.student.lc_recommend_learn.StudentLCUserKnowledgeStats20dService;
+import com.example.backend.service.student.lc_recommend_learn.StudentLCRLUserKnowledgeStats20dService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,13 +23,13 @@ import java.util.List;
  * @Version 1.0
  */
 @Service
-public class StudentLCUserKnowledgeStats20dServiceImpl implements StudentLCUserKnowledgeStats20dService {
+public class StudentLCRLUserKnowledgeStats20dServiceImpl implements StudentLCRLUserKnowledgeStats20dService {
     
     @Autowired
     private UserKnowledgeStats20dMapper userKnowledgeStats20dMapper;
     
     @Override
-    public Result updateUserKnowledgeStats(StudentLCRecommendLearnRecodeDto req, List<String> knowledgeKeys) {
+    public Result updateUserKnowledgeStats(StudentLCRLRecommendLearnRecodeDto req, List<String> knowledgeKeys) {
 
         if(req.getIsComplete()==true){
             for(String knowledgeKey : knowledgeKeys){

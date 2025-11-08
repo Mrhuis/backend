@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentLCRecommendLearnRecodeDto {
+public class StudentLCRLRecommendLearnRecodeDto {
 
     /**
      * 用户标识

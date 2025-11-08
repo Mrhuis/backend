@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentLCRecommendLearnResourceDto {
+public class StudentLCRLRecommendLearnResourceDto {
 
     /**
      * 资源类型,实际上其中内容是id

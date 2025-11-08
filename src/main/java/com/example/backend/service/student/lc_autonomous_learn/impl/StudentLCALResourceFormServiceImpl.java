@@ -1,9 +1,10 @@
-package com.example.backend.service.student.lc_recommend_learn.impl;
+package com.example.backend.service.student.lc_autonomous_learn.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.backend.entity.ResourceForm;
 import com.example.backend.mapper.ResourceFormMapper;
-import com.example.backend.service.student.lc_recommend_learn.StudentLCResourceFormService;
+import com.example.backend.service.student.lc_autonomous_learn.StudentLCALResourceFormService;
+import com.example.backend.service.student.lc_recommend_learn.StudentLCRLResourceFormService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +17,10 @@ import org.springframework.stereotype.Service;
  *
  * @Author 陈昊锡
  * @Create 2025/10/31 9:17
- * @Version 1.0
+ *A@Version 1.0
  */
 @Service
-public class StudentLCResourceFormServiceImpl implements StudentLCResourceFormService {
+public class StudentLCALResourceFormServiceImpl implements StudentLCALResourceFormService {
     
     @Autowired
     private ResourceFormMapper resourceFormMapper;

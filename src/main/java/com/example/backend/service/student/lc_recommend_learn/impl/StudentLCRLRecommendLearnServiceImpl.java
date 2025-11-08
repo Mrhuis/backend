@@ -1,8 +1,8 @@
 package com.example.backend.service.student.lc_recommend_learn.impl;
 
 import com.example.backend.common.Result;
-import com.example.backend.controller.student.dto.StudentLCRecommendLearnRecodeDto;
-import com.example.backend.controller.student.dto.StudentLCRecommendLearnResourceDto;
+import com.example.backend.controller.student.dto.StudentLCRLRecommendLearnRecodeDto;
+import com.example.backend.controller.student.dto.StudentLCRLRecommendLearnResourceDto;
 import com.example.backend.controller.student.vo.StudentLCRecommendLearnResourceVo;
 import com.example.backend.entity.Item;
 import com.example.backend.entity.MediaAssets;
@@ -12,9 +12,7 @@ import com.example.backend.mapper.ItemsMapper;
 import com.example.backend.mapper.MediaAssetsMapper;
 import com.example.backend.mapper.ResourceFormMapper;
 import com.example.backend.mapper.UserResourceInteractionMapper;
-import com.example.backend.service.student.lc_recommend_learn.StudentLCPyModelApiService;
-import com.example.backend.service.student.lc_recommend_learn.StudentLCRecommendLearnService;
-import org.apache.ibatis.annotations.Mapper;
+import com.example.backend.service.student.lc_recommend_learn.StudentLCRLRecommendLearnService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +29,7 @@ import java.util.List;
  * @Version 1.0
  */
 @Service
-public class StudentLCRecommendLearnServiceImpl implements StudentLCRecommendLearnService {
+public class StudentLCRLRecommendLearnServiceImpl implements StudentLCRLRecommendLearnService {
     @Autowired
     private ResourceFormMapper resourceFormMapper;
 
@@ -44,10 +42,10 @@ public class StudentLCRecommendLearnServiceImpl implements StudentLCRecommendLea
     @Autowired
     private UserResourceInteractionMapper userResourceInteractionMapper;
     @Override
-    public Result getRecommendLearnResource(List<StudentLCRecommendLearnResourceDto> datas) {
+    public Result getRecommendLearnResource(List<StudentLCRLRecommendLearnResourceDto> datas) {
         List<StudentLCRecommendLearnResourceVo> studentLCRecommendLearnResourceVos = new ArrayList<>();
         StudentLCRecommendLearnResourceVo studentLCRecommendLearnResourceVo;
-        for(StudentLCRecommendLearnResourceDto data:datas){
+        for(StudentLCRLRecommendLearnResourceDto data:datas){
             studentLCRecommendLearnResourceVo = new StudentLCRecommendLearnResourceVo();
             ResourceForm resourceForm = resourceFormMapper.selectById(data.getFormId());
             if(resourceForm != null){
@@ -78,7 +76,7 @@ public class StudentLCRecommendLearnServiceImpl implements StudentLCRecommendLea
     }
 
     @Override
-    public Result recode(StudentLCRecommendLearnRecodeDto req) {
+    public Result recode(StudentLCRLRecommendLearnRecodeDto req) {
         UserResourceInteraction interaction = new UserResourceInteraction(
                 null,                           // id
                 req.getUserKey(),               // userKey

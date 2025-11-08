@@ -1,4 +1,4 @@
-package com.example.backend.service.student.lc_recommend_learn;
+package com.example.backend.service.student.lc_autonomous_learn;
 
 import com.example.backend.common.Result;
 
@@ -11,6 +11,6 @@ import com.example.backend.common.Result;
  * @Create 2025/10/30 17:57
  * @Version 1.0
  */
-public interface StudentLCUserResourcePreference7dService {
+public interface StudentLCALUserResourcePreference7dService {
     Result updateUserResourcePreference(String userKey, String formKey);
 }

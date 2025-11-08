@@ -1,10 +1,11 @@
-package com.example.backend.service.student.lc_recommend_learn.impl;
+package com.example.backend.service.student.lc_autonomous_learn.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.backend.common.Result;
 import com.example.backend.entity.UserResourcePreference7d;
 import com.example.backend.mapper.UserResourcePreference7dMapper;
-import com.example.backend.service.student.lc_recommend_learn.StudentLCUserResourcePreference7dService;
+import com.example.backend.service.student.lc_autonomous_learn.StudentLCALUserResourcePreference7dService;
+import com.example.backend.service.student.lc_recommend_learn.StudentLCRLUserResourcePreference7dService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,7 @@ import java.time.LocalDateTime;
  * @Version 1.0
  */
 @Service
-public class StudentLCUserResourcePreference7DServiceImpl implements StudentLCUserResourcePreference7dService {
+public class StudentLCALUserResourcePreference7DServiceImpl implements StudentLCALUserResourcePreference7dService {
 
     @Autowired
     UserResourcePreference7dMapper userResourcePreference7dMapper;

@@ -1,4 +1,4 @@
-package com.example.backend.service.student.lc_recommend_learn;
+package com.example.backend.service.student.lc_autonomous_learn;
 
 import java.util.List;
 
@@ -11,6 +11,6 @@ import java.util.List;
  * @Create 2025/10/31 9:19
  * @Version 1.0
  */
-public interface StudentLCKnowledgeResourcesService {
+public interface StudentLCALKnowledgeResourcesService {
     List<String> getKnowledgeKeys(String resourceType, String resourceKey);
 }

@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentLCPyModelApiDto {
+public class StudentLCRLPyModelApiDto {
     /**
      * 用户标识
      */
