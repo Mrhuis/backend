@@ -31,7 +31,8 @@ public class StudentLCALUserKnowledgeStats20dServiceImpl implements StudentLCALU
     @Override
     public Result updateUserKnowledgeStats(StudentLCAutonomousLearnRecodeDto req, List<String> knowledgeKeys) {
 
-        if(req.getIsComplete()==true){
+        // 修复空指针异常：添加 null 检查
+        if(Boolean.TRUE.equals(req.getIsComplete())){
             for(String knowledgeKey : knowledgeKeys){
                 // 根据userKey和knowledgeKey查找出对应的userKnowledgeStats20d，如果没有则创建一个插入到表中
                 // 添加record_time条件，确保在当前日期的时间范围内
@@ -60,7 +61,7 @@ public class StudentLCALUserKnowledgeStats20dServiceImpl implements StudentLCALU
                 userKnowledgeStats20d.setTotalCount(userKnowledgeStats20d.getTotalCount() + 1);
                 
                 // 如果req.getIsCorrect()==true，则correctCount加1
-                if (req.getIsCorrect() == true) {
+                if (Boolean.TRUE.equals(req.getIsCorrect())) {
                     userKnowledgeStats20d.setCorrectCount(userKnowledgeStats20d.getCorrectCount() + 1);
                 }
 

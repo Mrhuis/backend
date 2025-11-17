@@ -4,11 +4,17 @@ import com.example.backend.common.Result;
 import com.example.backend.common.vo.QueryListVo;
 import com.example.backend.controller.student.dto.StudentLCAutonomousLearnListDto;
 import com.example.backend.controller.student.dto.StudentLCAutonomousLearnRecodeDto;
+import com.example.backend.controller.student.vo.StudentLCAutonomousLearnItemsListVo;
+import com.example.backend.controller.student.vo.StudentLCAutonomousLearnVideosListVo;
+import com.example.backend.entity.Item;
+import com.example.backend.entity.MediaAssets;
 import com.example.backend.service.student.lc_autonomous_learn.*;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * ClassName: StudentLCAutonomousLearnController
@@ -39,15 +45,76 @@ public class StudentLCAutonomousLearnController {
     @Autowired
     private StudentLCALResourceFormService studentLCALResourceFormService;
 
-    @PostMapping("/list")
-    public Result<QueryListVo> getTagList(@RequestBody StudentLCAutonomousLearnListDto req) {
+    @Autowired
+    private StudentLCALItemsService studentLCALItemsService;
+    
+    @Autowired
+    private StudentLCALVideosService studentLCALVideosService;
 
+    @PostMapping("/itemsList")
+    public Result<QueryListVo> getItemsList(@RequestBody StudentLCAutonomousLearnListDto req) {
+        try {
+            // 获取习题列表
+            List<Item> items = studentLCALItemsService.getItemsList(req);
 
+            // 获取总数
+            Long total = studentLCALItemsService.getItemsCount(req);
 
+            // 转换为VO对象列表
+            List<StudentLCAutonomousLearnItemsListVo> itemVos = items.stream().map(item -> {
+                StudentLCAutonomousLearnItemsListVo vo = new StudentLCAutonomousLearnItemsListVo();
+                BeanUtils.copyProperties(item, vo);
+                return vo;
+            }).collect(Collectors.toList());
 
+            // 构建分页结果
+            QueryListVo result = new QueryListVo();
+            result.setRecords(itemVos.stream().map(itemVo -> (Object) itemVo).collect(Collectors.toList()));
+            result.setTotal(total);
+            int pageSize = req.getPageSize() != null ? req.getPageSize() : 100;
+            result.setSize(pageSize);
+            int currentPage = req.getPageIndex() != null ? req.getPageIndex() : 1;
+            result.setCurrent(currentPage);
+            result.setPages((int) Math.ceil((double) total / pageSize));
 
-
+            return Result.success(result);
+        } catch (Exception e) {
+            return Result.error("获取习题列表失败: " + e.getMessage());
+        }
     }
+
+    @PostMapping("/videosList")
+    public Result<QueryListVo> getVideosList(@RequestBody StudentLCAutonomousLearnListDto req) {
+        try {
+            // 获取视频列表
+            List<MediaAssets> videos = studentLCALVideosService.getVideosList(req);
+
+            // 获取总数
+            Long total = studentLCALVideosService.getVideosCount(req);
+
+            // 转换为VO对象列表
+            List<StudentLCAutonomousLearnVideosListVo> videoVos = videos.stream().map(video -> {
+                StudentLCAutonomousLearnVideosListVo vo = new StudentLCAutonomousLearnVideosListVo();
+                BeanUtils.copyProperties(video, vo);
+                return vo;
+            }).collect(Collectors.toList());
+
+            // 构建分页结果
+            QueryListVo result = new QueryListVo();
+            result.setRecords(videoVos.stream().map(videoVo -> (Object) videoVo).collect(Collectors.toList()));
+            result.setTotal(total);
+            int pageSize = req.getPageSize() != null ? req.getPageSize() : 100;
+            result.setSize(pageSize);
+            int currentPage = req.getPageIndex() != null ? req.getPageIndex() : 1;
+            result.setCurrent(currentPage);
+            result.setPages((int) Math.ceil((double) total / pageSize));
+
+            return Result.success(result);
+        } catch (Exception e) {
+            return Result.error("获取视频列表失败: " + e.getMessage());
+        }
+    }
+    
     @PostMapping("recode")
     public Result recode(@RequestBody StudentLCAutonomousLearnRecodeDto req) {
 
