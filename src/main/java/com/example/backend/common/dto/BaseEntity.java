@@ -1,5 +1,6 @@
 package com.example.backend.common.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -40,12 +41,14 @@ public class BaseEntity {
     /**
      * 当前页数
      */
-    @JsonProperty("page_index")
+    @JsonAlias({"page_index", "pageIndex"})
+//    @JsonProperty("page_index")
     private Integer pageIndex = 1;
     /**
      * 每页数量
      */
-    @JsonProperty("page_size")
+    @JsonAlias({"page_size", "pageSize"})
+//    @JsonProperty("page_size")
     private Integer pageSize = 100;
     /**
      * 数据库分页
@@ -54,6 +57,7 @@ public class BaseEntity {
     /**
      * 模糊搜索值
      */
-    @JsonProperty("search_value")
+    @JsonAlias({"search_value", "searchValue"})
+//    @JsonProperty("search_value")
     private String searchValue;
 }
