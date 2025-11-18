@@ -6,10 +6,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.backend.controller.admin.dto.AdminUserAddDto;
 import com.example.backend.controller.admin.dto.AdminUserQueryListDto;
 import com.example.backend.controller.admin.dto.AdminUserUpdateDto;
+import com.example.backend.controller.admin.vo.AdminSimpleUserVo;
+import com.example.backend.controller.admin.vo.AdminUserBasicInfoVo;
 import com.example.backend.controller.admin.vo.AdminUserQueryDetailVo;
 import com.example.backend.entity.User;
 
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * ClassName: AdminUserManageService
@@ -63,4 +66,19 @@ public interface AdminUserManageService {
      * @return 用户详情
      */
     AdminUserQueryDetailVo getUserDetailById(Long id);
+    
+    /**
+     * 获取简化版用户列表(status为enabled的用户)
+     * @return 简化版用户列表
+     */
+    List<AdminSimpleUserVo> getSimpleUserList();
+    
+    /**
+     * 通过user_key获取用户基本信息（用户名和昵称）
+     * @param userKey 用户业务唯一标识
+     * @return 用户基本信息
+     */
+    AdminUserBasicInfoVo getUserBasicInfoByUserKey(String userKey);
+    
+
 }

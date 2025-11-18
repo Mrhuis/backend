@@ -51,7 +51,7 @@ public class TeacherMessageCenterController {
     }
 
     /**
-     * 根据用户ID查询消息列表（发送者或接收者为该用户）
+     * 根据用户key查询消息列表（发送者或接收者为该用户）
      *
      * @param req 查询条件
      * @return 消息列表
@@ -62,7 +62,7 @@ public class TeacherMessageCenterController {
             log.info("收到获取消息列表请求，参数: {}", req);
 
             // 获取消息列表
-            List<Message> messages = teacherMessageCenterService.getMessageListByUserId(req);
+            List<Message> messages = teacherMessageCenterService.getMessageListByUserKey(req);
             log.info("获取到消息列表，数量: {}", messages.size());
 
             // 获取总数

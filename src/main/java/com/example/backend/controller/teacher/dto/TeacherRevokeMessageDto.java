@@ -1,11 +1,13 @@
 package com.example.backend.controller.teacher.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 /**
  * 撤回消息DTO
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TeacherRevokeMessageDto {
     /**
      * 消息ID
@@ -13,7 +15,7 @@ public class TeacherRevokeMessageDto {
     private Long id;
 
     /**
-     * 用户ID（验证是否是发送者）
+     * 用户key（验证是否是发送者）
      */
-    private Long userId;
+    private String userKey;
 }

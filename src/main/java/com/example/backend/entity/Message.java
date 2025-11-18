@@ -25,16 +25,16 @@ public class Message {
     private Long convId;
 
     /**
-     * 发送者user_id
+     * 发送者user_key
      */
-    @TableField("sender_id")
-    private Long senderId;
+    @TableField("sender_key")
+    private String senderKey;
 
     /**
-     * 接收者user_id（单聊为用户ID，群聊为群ID）
+     * 接收者user_key（单聊为用户ID，群聊为群ID）
      */
-    @TableField("receiver_id")
-    private Long receiverId;
+    @TableField("receiver_key")
+    private String receiverKey;
 
     /**
      * 文本内容（富文本可存JSON）

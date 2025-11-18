@@ -5,6 +5,8 @@ import com.example.backend.common.vo.QueryListVo;
 import com.example.backend.controller.admin.dto.AdminUserAddDto;
 import com.example.backend.controller.admin.dto.AdminUserQueryListDto;
 import com.example.backend.controller.admin.dto.AdminUserUpdateDto;
+import com.example.backend.controller.admin.vo.AdminSimpleUserVo;
+import com.example.backend.controller.admin.vo.AdminUserBasicInfoVo;
 import com.example.backend.controller.admin.vo.AdminUserQueryDetailVo;
 import com.example.backend.entity.User;
 import com.example.backend.service.admin.user_manage.AdminUserManageService;
@@ -12,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -73,6 +76,26 @@ public class AdminUserManageController {
         } catch (Exception e) {
             log.error("获取用户列表失败", e);
             return Result.error("获取用户列表失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取简化版用户列表 (status为enabled的用户)
+     * @return 简化版用户列表
+     */
+    @GetMapping("/simple-list")
+    public Result<List<AdminSimpleUserVo>> getSimpleUserList() {
+        try {
+            log.info("收到获取简化版用户列表请求");
+            
+            // 获取简化版用户列表
+            List<AdminSimpleUserVo> simpleUsers = adminUserManageService.getSimpleUserList();
+            log.info("获取到简化版用户列表，数量: {}", simpleUsers.size());
+            
+            return Result.success(simpleUsers);
+        } catch (Exception e) {
+            log.error("获取简化版用户列表失败", e);
+            return Result.error("获取简化版用户列表失败: " + e.getMessage());
         }
     }
     
@@ -149,6 +172,28 @@ public class AdminUserManageController {
             }
         } catch (Exception e) {
             return Result.error("获取用户详情时发生错误: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 通过user_key获取用户基本信息（用户名和昵称）
+     * @param userKey 用户业务唯一标识
+     * @return 用户基本信息
+     */
+    @GetMapping("/basic-info")
+    public Result<AdminUserBasicInfoVo> getUserBasicInfo(@RequestParam String userKey) {
+        try {
+            log.info("收到获取用户基本信息请求，userKey: {}", userKey);
+            
+            AdminUserBasicInfoVo userInfo = adminUserManageService.getUserBasicInfoByUserKey(userKey);
+            if (userInfo != null) {
+                return Result.success(userInfo);
+            } else {
+                return Result.error("未找到用户");
+            }
+        } catch (Exception e) {
+            log.error("获取用户基本信息失败", e);
+            return Result.error("获取用户基本信息失败: " + e.getMessage());
         }
     }
 }

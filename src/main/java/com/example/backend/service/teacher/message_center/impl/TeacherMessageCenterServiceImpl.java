@@ -38,8 +38,8 @@ public class TeacherMessageCenterServiceImpl implements TeacherMessageCenterServ
             // 创建消息对象
             Message message = new Message();
             message.setConvId(convId);
-            message.setSenderId(req.getSenderId());
-            message.setReceiverId(req.getReceiverId());
+            message.setSenderKey(req.getSenderKey());
+            message.setReceiverKey(req.getReceiverKey());
             message.setContent(req.getContent());
             message.setAttachUrl(req.getAttachUrl());
             message.setMsgType(req.getMsgType());
@@ -55,16 +55,16 @@ public class TeacherMessageCenterServiceImpl implements TeacherMessageCenterServ
     }
 
     @Override
-    public List<Message> getMessageListByUserId(TeacherQueryMessageListDto req) {
+    public List<Message> getMessageListByUserKey(TeacherQueryMessageListDto req) {
         try {
             QueryWrapper<Message> queryWrapper = new QueryWrapper<>();
 
-            if (req != null && req.getUserId() != null) {
+            if (req != null && req.getUserKey() != null) {
                 // 查询条件：用户是发送者且未删除，或用户是接收者且未删除
-                queryWrapper.and(wrapper -> 
-                    wrapper.eq("sender_id", req.getUserId()).eq("sender_delete", 0)
+                queryWrapper.and(wrapper ->
+                    wrapper.eq("sender_key", req.getUserKey()).eq("sender_delete", 0)
                            .or()
-                           .eq("receiver_id", req.getUserId()).eq("receiver_delete", 0)
+                           .eq("receiver_key", req.getUserKey()).eq("receiver_delete", 0)
                 );
             }
 
@@ -93,12 +93,12 @@ public class TeacherMessageCenterServiceImpl implements TeacherMessageCenterServ
         try {
             QueryWrapper<Message> queryWrapper = new QueryWrapper<>();
 
-            if (req != null && req.getUserId() != null) {
+            if (req != null && req.getUserKey() != null) {
                 // 查询条件：用户是发送者且未删除，或用户是接收者且未删除
-                queryWrapper.and(wrapper -> 
-                    wrapper.eq("sender_id", req.getUserId()).eq("sender_delete", 0)
+                queryWrapper.and(wrapper ->
+                    wrapper.eq("sender_key", req.getUserKey()).eq("sender_delete", 0)
                            .or()
-                           .eq("receiver_id", req.getUserId()).eq("receiver_delete", 0)
+                           .eq("receiver_key", req.getUserKey()).eq("receiver_delete", 0)
                 );
             }
 
@@ -124,7 +124,7 @@ public class TeacherMessageCenterServiceImpl implements TeacherMessageCenterServ
             }
 
             // 验证是否是发送者操作
-            if (!message.getSenderId().equals(req.getUserId())) {
+            if (!message.getSenderKey().equals(req.getUserKey())) {
                 throw new RuntimeException("只能撤回自己发送的消息");
             }
 
@@ -162,10 +162,10 @@ public class TeacherMessageCenterServiceImpl implements TeacherMessageCenterServ
             updateWrapper.eq("id", req.getId());
 
             // 判断是发送者还是接收者操作
-            if (message.getSenderId().equals(req.getUserId())) {
+            if (message.getSenderKey().equals(req.getUserKey())) {
                 // 发送者删除
                 updateWrapper.set("sender_delete", 1);
-            } else if (message.getReceiverId().equals(req.getUserId())) {
+            } else if (message.getReceiverKey().equals(req.getUserKey())) {
                 // 接收者删除
                 updateWrapper.set("receiver_delete", 1);
             } else {
@@ -191,14 +191,14 @@ public class TeacherMessageCenterServiceImpl implements TeacherMessageCenterServ
         if (req == null) {
             throw new IllegalArgumentException("消息参数不能为空");
         }
-        if (req.getSenderId() == null || req.getReceiverId() == null) {
-            throw new IllegalArgumentException("发送者和接收者ID不能为空");
+        if (req.getSenderKey() == null || req.getReceiverKey() == null) {
+            throw new IllegalArgumentException("发送者和接收者key不能为空");
         }
         if (req.getConvId() != null) {
             return req.getConvId();
         }
 
-        Long existingConvId = findExistingConvId(req.getSenderId(), req.getReceiverId());
+        Long existingConvId = findExistingConvId(req.getSenderKey(), req.getReceiverKey());
         if (existingConvId != null) {
             return existingConvId;
         }
@@ -209,16 +209,16 @@ public class TeacherMessageCenterServiceImpl implements TeacherMessageCenterServ
     /**
      * 根据双方历史消息查找会话ID
      *
-     * @param senderId   发送者ID
-     * @param receiverId 接收者ID
+     * @param senderKey   发送者key
+     * @param receiverKey 接收者key
      * @return 历史会话ID或null
      */
-    private Long findExistingConvId(Long senderId, Long receiverId) {
+    private Long findExistingConvId(String senderKey, String receiverKey) {
         QueryWrapper<Message> wrapper = new QueryWrapper<>();
         wrapper.select("conv_id")
-                .and(w -> w.eq("sender_id", senderId).eq("receiver_id", receiverId)
+                .and(w -> w.eq("sender_key", senderKey).eq("receiver_key", receiverKey)
                         .or()
-                        .eq("sender_id", receiverId).eq("receiver_id", senderId))
+                        .eq("sender_key", receiverKey).eq("receiver_key", senderKey))
                 .isNotNull("conv_id")
                 .orderByDesc("send_time")
                 .last("LIMIT 1");

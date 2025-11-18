@@ -24,12 +24,12 @@ public interface TeacherMessageCenterService {
     boolean addMessage(TeacherAddMessageDto req);
 
     /**
-     * 根据用户ID查询消息列表（发送者或接收者为该用户）
+     * 根据用户key查询消息列表（发送者或接收者为该用户）
      *
      * @param req 查询条件
      * @return 消息列表
      */
-    List<Message> getMessageListByUserId(TeacherQueryMessageListDto req);
+    List<Message> getMessageListByUserKey(TeacherQueryMessageListDto req);
 
     /**
      * 获取消息总数
@@ -42,7 +42,7 @@ public interface TeacherMessageCenterService {
     /**
      * 撤回消息
      *
-     * @param req 消息ID和用户ID
+     * @param req 消息ID和用户key
      * @return 是否撤回成功
      */
     boolean revokeMessage(TeacherRevokeMessageDto req);
@@ -50,7 +50,7 @@ public interface TeacherMessageCenterService {
     /**
      * 删除消息（逻辑删除）
      *
-     * @param req 消息ID和用户ID
+     * @param req 消息ID和用户key
      * @return 是否删除成功
      */
     boolean deleteMessage(TeacherDeleteMessageDto req);

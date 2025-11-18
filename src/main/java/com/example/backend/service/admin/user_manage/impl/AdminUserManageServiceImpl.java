@@ -6,18 +6,28 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.backend.controller.admin.dto.AdminUserAddDto;
 import com.example.backend.controller.admin.dto.AdminUserQueryListDto;
 import com.example.backend.controller.admin.dto.AdminUserUpdateDto;
+import com.example.backend.controller.admin.vo.AdminSimpleUserVo;
+import com.example.backend.controller.admin.vo.AdminUserBasicInfoVo;
 import com.example.backend.controller.admin.vo.AdminUserQueryDetailVo;
 import com.example.backend.entity.User;
 import com.example.backend.mapper.UserMapper;
 import com.example.backend.service.admin.user_manage.AdminUserManageService;
+import com.example.backend.tool.DirectoryTool;
+import com.example.backend.tool.media.MultipartFileTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * ClassName: AdminUserManageServiceImpl
@@ -34,6 +44,9 @@ public class AdminUserManageServiceImpl implements AdminUserManageService {
     
     @Autowired
     private UserMapper userMapper;
+    
+    @Value("${upload.resource.path}")
+    private String baseResourcePath;
     
     @Override
     public List<User> getUserList(AdminUserQueryListDto req) {
@@ -161,4 +174,48 @@ public class AdminUserManageServiceImpl implements AdminUserManageService {
             return null;
         }
     }
+    
+    @Override
+    public List<AdminSimpleUserVo> getSimpleUserList() {
+        // 创建查询条件，只查询status为enabled的用户
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("status", "enabled");
+        
+        // 查询用户列表
+        List<User> users = userMapper.selectList(queryWrapper);
+        
+        // 转换为简化版VO对象
+        return users.stream().map(user -> {
+            AdminSimpleUserVo vo = new AdminSimpleUserVo();
+            vo.setId(user.getId());
+            vo.setUsername(user.getUsername());
+            vo.setUserKey(user.getUserKey());
+            vo.setNickname(user.getNickname());
+            vo.setRole(user.getRole());
+            vo.setStatus(user.getStatus());
+            return vo;
+        }).collect(Collectors.toList());
+    }
+    
+    @Override
+    public AdminUserBasicInfoVo getUserBasicInfoByUserKey(String userKey) {
+        // 创建查询条件
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_key", userKey);
+        
+        // 查询用户
+        User user = userMapper.selectOne(queryWrapper);
+        
+        // 如果用户存在，转换为VO对象
+        if (user != null) {
+            AdminUserBasicInfoVo vo = new AdminUserBasicInfoVo();
+            vo.setUserKey(user.getUserKey());
+            vo.setUsername(user.getUsername());
+            vo.setNickname(user.getNickname());
+            return vo;
+        }
+        
+        return null;
+    }
+
 }

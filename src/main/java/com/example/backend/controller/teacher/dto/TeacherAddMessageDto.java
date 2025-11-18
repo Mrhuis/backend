@@ -1,5 +1,6 @@
 package com.example.backend.controller.teacher.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
  * 添加消息DTO
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TeacherAddMessageDto {
     /**
      * 所属会话ID
@@ -15,14 +17,14 @@ public class TeacherAddMessageDto {
     private Long convId;
 
     /**
-     * 发送者user_id
+     * 发送者user_key
      */
-    private Long senderId;
+    private String senderKey;
 
     /**
-     * 接收者user_id（单聊为用户ID，群聊为群ID）
+     * 接收者user_key（单聊为用户ID，群聊为群ID）
      */
-    private Long receiverId;
+    private String receiverKey;
 
     /**
      * 文本内容（富文本可存JSON）
