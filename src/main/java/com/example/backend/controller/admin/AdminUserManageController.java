@@ -1,5 +1,6 @@
 package com.example.backend.controller.admin;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.backend.common.Result;
 import com.example.backend.common.vo.QueryListVo;
 import com.example.backend.controller.admin.dto.AdminUserAddDto;
@@ -9,6 +10,7 @@ import com.example.backend.controller.admin.vo.AdminSimpleUserVo;
 import com.example.backend.controller.admin.vo.AdminUserBasicInfoVo;
 import com.example.backend.controller.admin.vo.AdminUserQueryDetailVo;
 import com.example.backend.entity.User;
+import com.example.backend.mapper.UserMapper;
 import com.example.backend.service.admin.user_manage.AdminUserManageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -35,6 +37,9 @@ public class AdminUserManageController {
     
     @Autowired
     private AdminUserManageService adminUserManageService;
+    
+    @Autowired
+    private UserMapper userMapper;
     
     /**
      * 获取用户列表
@@ -194,6 +199,28 @@ public class AdminUserManageController {
         } catch (Exception e) {
             log.error("获取用户基本信息失败", e);
             return Result.error("获取用户基本信息失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 通过user_key获取用户详细信息
+     * @param userKey 用户业务唯一标识
+     * @return 用户详细信息
+     */
+    @GetMapping("/detail-by-key")
+    public Result<AdminUserQueryDetailVo> getUserDetailByKey(@RequestParam String userKey) {
+        try {
+            log.info("收到获取用户详细信息请求，userKey: {}", userKey);
+            
+            AdminUserQueryDetailVo userDetail = adminUserManageService.getUserDetailByKey(userKey);
+            if (userDetail != null) {
+                return Result.success(userDetail);
+            } else {
+                return Result.error("未找到用户");
+            }
+        } catch (Exception e) {
+            log.error("获取用户详细信息失败", e);
+            return Result.error("获取用户详细信息失败: " + e.getMessage());
         }
     }
 }

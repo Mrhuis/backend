@@ -217,5 +217,24 @@ public class AdminUserManageServiceImpl implements AdminUserManageService {
         
         return null;
     }
+    
+    @Override
+    public AdminUserQueryDetailVo getUserDetailByKey(String userKey) {
+        // 创建查询条件
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_key", userKey);
+        
+        // 查询用户
+        User user = userMapper.selectOne(queryWrapper);
+        
+        // 如果用户存在，转换为VO对象
+        if (user != null) {
+            AdminUserQueryDetailVo vo = new AdminUserQueryDetailVo();
+            BeanUtils.copyProperties(user, vo);
+            return vo;
+        }
+        
+        return null;
+    }
 
 }

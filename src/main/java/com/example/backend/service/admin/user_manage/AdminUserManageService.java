@@ -80,5 +80,11 @@ public interface AdminUserManageService {
      */
     AdminUserBasicInfoVo getUserBasicInfoByUserKey(String userKey);
     
+    /**
+     * 通过user_key获取用户详细信息
+     * @param userKey 用户业务唯一标识
+     * @return 用户详细信息
+     */
+    AdminUserQueryDetailVo getUserDetailByKey(String userKey);
 
 }
