@@ -124,4 +124,24 @@ public class TeacherMessageCenterController {
             return Result.error("删除消息时发生错误: " + e.getMessage());
         }
     }
+    
+    /**
+     * 标记会话消息为已读
+     *
+     * @param req 包含会话ID和用户key的请求对象
+     * @return 标记结果
+     */
+    @PostMapping("/mark-as-read")
+    public Result markAsRead(@RequestBody TeacherMarkAsReadDto req) {
+        try {
+            boolean success = teacherMessageCenterService.markAsRead(req);
+            if (success) {
+                return Result.success("消息标记为已读成功");
+            } else {
+                return Result.error("消息标记为已读失败");
+            }
+        } catch (Exception e) {
+            return Result.error("标记消息为已读时发生错误: " + e.getMessage());
+        }
+    }
 }

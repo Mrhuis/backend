@@ -54,4 +54,12 @@ public interface TeacherMessageCenterService {
      * @return 是否删除成功
      */
     boolean deleteMessage(TeacherDeleteMessageDto req);
+    
+    /**
+     * 标记会话消息为已读
+     *
+     * @param req 包含会话ID和用户key的请求对象
+     * @return 是否更新成功
+     */
+    boolean markAsRead(TeacherMarkAsReadDto req);
 }

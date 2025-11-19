@@ -181,6 +181,26 @@ public class TeacherMessageCenterServiceImpl implements TeacherMessageCenterServ
         }
     }
 
+    @Override
+    public boolean markAsRead(TeacherMarkAsReadDto req) {
+        try {
+            Long convId = parseConvId(req.getConvId());
+
+            // 构建更新条件：会话ID匹配且当前用户是接收者
+            UpdateWrapper<Message> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("conv_id", convId);
+            updateWrapper.eq("receiver_key", req.getUserKey());
+            updateWrapper.set("is_read", 1);
+
+            // 执行更新
+            int result = messageMapper.update(null, updateWrapper);
+            return result > 0;
+        } catch (Exception e) {
+            log.error("标记消息为已读失败", e);
+            throw new RuntimeException("标记消息为已读失败: " + e.getMessage());
+        }
+    }
+
     /**
      * 解析并生成会话ID
      *
@@ -225,5 +245,22 @@ public class TeacherMessageCenterServiceImpl implements TeacherMessageCenterServ
 
         Message existing = messageMapper.selectOne(wrapper);
         return existing != null ? existing.getConvId() : null;
+    }
+
+    /**
+     * 将字符串形式的会话ID转换为Long，确保兼容前端避免精度丢失的传输方式
+     *
+     * @param convIdStr 前端传入的会话ID
+     * @return Long 类型的会话ID
+     */
+    private Long parseConvId(String convIdStr) {
+        if (convIdStr == null || convIdStr.isEmpty()) {
+            throw new IllegalArgumentException("会话ID不能为空");
+        }
+        try {
+            return new java.math.BigInteger(convIdStr).longValueExact();
+        } catch (ArithmeticException | NumberFormatException ex) {
+            throw new IllegalArgumentException("会话ID格式不正确", ex);
+        }
     }
 }
