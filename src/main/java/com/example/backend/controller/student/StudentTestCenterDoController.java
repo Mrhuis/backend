@@ -7,24 +7,24 @@ import com.example.backend.controller.student.vo.StudentExamPaperListVo;
 import com.example.backend.entity.ExamPaperQuestion;
 import com.example.backend.entity.Item;
 import com.example.backend.entity.StudentAnswer;
-import com.example.backend.service.student.test_center.ExamPaperQuestionService;
-import com.example.backend.service.student.test_center.ItemService;
-import com.example.backend.service.student.test_center.StudentAnswerService;
-import com.example.backend.service.student.test_center.StudentExamPaperService;
+import com.example.backend.service.student.test_center_do.ExamPaperQuestionService;
+import com.example.backend.service.student.test_center_do.ItemService;
+import com.example.backend.service.student.test_center_do.StudentAnswerService;
+import com.example.backend.service.student.test_center_do.StudentExamPaperService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/student/test-center")
-public class StudentTestCenterController {
+@RequestMapping("/api/student/test-center-do")
+public class StudentTestCenterDoController {
 
     private final StudentAnswerService studentAnswerService;
     private final ItemService itemService;
     private final StudentExamPaperService studentExamPaperService;
     private final ExamPaperQuestionService examPaperQuestionService;
 
-    public StudentTestCenterController(StudentAnswerService studentAnswerService, ItemService itemService, StudentExamPaperService studentExamPaperService, ExamPaperQuestionService examPaperQuestionService) {
+    public StudentTestCenterDoController(StudentAnswerService studentAnswerService, ItemService itemService, StudentExamPaperService studentExamPaperService, ExamPaperQuestionService examPaperQuestionService) {
         this.studentAnswerService = studentAnswerService;
         this.itemService = itemService;
         this.studentExamPaperService = studentExamPaperService;

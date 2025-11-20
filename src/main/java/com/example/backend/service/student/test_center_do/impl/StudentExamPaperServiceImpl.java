@@ -1,4 +1,4 @@
-package com.example.backend.service.student.test_center.impl;
+package com.example.backend.service.student.test_center_do.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.backend.controller.student.vo.StudentExamPaperListVo;
@@ -8,7 +8,7 @@ import com.example.backend.entity.ExamPaperDistribution;
 import com.example.backend.mapper.ClassStudentEnrollmentMapper;
 import com.example.backend.mapper.ExamPaperDistributionMapper;
 import com.example.backend.mapper.ExamPaperMapper;
-import com.example.backend.service.student.test_center.StudentExamPaperService;
+import com.example.backend.service.student.test_center_do.StudentExamPaperService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

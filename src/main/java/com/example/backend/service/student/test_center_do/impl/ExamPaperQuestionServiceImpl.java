@@ -1,9 +1,9 @@
-package com.example.backend.service.student.test_center.impl;
+package com.example.backend.service.student.test_center_do.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.backend.entity.ExamPaperQuestion;
 import com.example.backend.mapper.ExamPaperQuestionMapper;
-import com.example.backend.service.student.test_center.ExamPaperQuestionService;
+import com.example.backend.service.student.test_center_do.ExamPaperQuestionService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
