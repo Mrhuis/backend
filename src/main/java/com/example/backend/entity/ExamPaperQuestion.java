@@ -24,10 +24,10 @@ public class ExamPaperQuestion {
     private Long paperId;
 
     /**
-     * 题目ID（关联question表）
+     * 题目KEY（关联question表）
      */
-    @TableField("item_id")
-    private Long itemId;
+    @TableField("item_key")
+    private String itemKey;
 
     /**
      * 题目在试卷中的顺序（越小越靠前）

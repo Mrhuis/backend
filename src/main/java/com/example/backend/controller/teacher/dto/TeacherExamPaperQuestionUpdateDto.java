@@ -18,9 +18,9 @@ public class TeacherExamPaperQuestionUpdateDto {
     private Long paperId;
 
     /**
-     * 题目ID
+     * 题目KEY
      */
-    private Long itemId;
+    private String itemKey;
 
     /**
      * 题目顺序

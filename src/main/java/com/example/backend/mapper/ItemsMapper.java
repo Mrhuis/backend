@@ -17,5 +17,13 @@ public interface ItemsMapper extends BaseMapper<Item> {
      */
     @Select("SELECT * FROM items WHERE item_key = #{itemKey} AND form_key = #{formKey} AND status = 'ENABLED'")
     Item selectByItemKeyAndFormKey(@Param("itemKey") String itemKey, @Param("formKey") String formKey);
+    
+    /**
+     * 根据习题key查询习题资源
+     * @param itemKey 习题key
+     * @return 习题资源对象
+     */
+    @Select("SELECT * FROM items WHERE item_key = #{itemKey}")
+    Item selectByItemKey(@Param("itemKey") String itemKey);
 
 }

@@ -14,8 +14,8 @@ public class TeacherExamPaperQuestionQueryListDto extends BaseEntity {
     private Long paperId;
 
     /**
-     * 题目ID
+     * 题目KEY
      */
-    private Long itemId;
+    private String itemKey;
 
 }

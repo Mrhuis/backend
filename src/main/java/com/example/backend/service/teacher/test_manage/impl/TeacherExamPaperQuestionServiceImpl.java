@@ -36,9 +36,9 @@ public class TeacherExamPaperQuestionServiceImpl implements TeacherExamPaperQues
                     queryWrapper.eq("paper_id", req.getPaperId());
                 }
 
-                // 题目ID精确查询
-                if (req.getItemId() != null && req.getItemId() > 0) {
-                    queryWrapper.eq("item_id", req.getItemId());
+                // 题目KEY精确查询
+                if (StringUtils.hasText(req.getItemKey())) {
+                    queryWrapper.eq("item_key", req.getItemKey());
                 }
             }
 
@@ -73,9 +73,9 @@ public class TeacherExamPaperQuestionServiceImpl implements TeacherExamPaperQues
                     queryWrapper.eq("paper_id", req.getPaperId());
                 }
 
-                // 题目ID精确查询
-                if (req.getItemId() != null && req.getItemId() > 0) {
-                    queryWrapper.eq("item_id", req.getItemId());
+                // 题目KEY精确查询
+                if (StringUtils.hasText(req.getItemKey())) {
+                    queryWrapper.eq("item_key", req.getItemKey());
                 }
             }
 
@@ -97,7 +97,7 @@ public class TeacherExamPaperQuestionServiceImpl implements TeacherExamPaperQues
             // 创建试卷题目对象
             ExamPaperQuestion examPaperQuestion = new ExamPaperQuestion();
             examPaperQuestion.setPaperId(req.getPaperId());
-            examPaperQuestion.setItemId(req.getItemId());
+            examPaperQuestion.setItemKey(req.getItemKey());
             examPaperQuestion.setSortNum(req.getSortNum());
             examPaperQuestion.setActualScore(req.getActualScore());
 
@@ -126,8 +126,8 @@ public class TeacherExamPaperQuestionServiceImpl implements TeacherExamPaperQues
             if (req.getPaperId() != null) {
                 updateWrapper.set("paper_id", req.getPaperId());
             }
-            if (req.getItemId() != null) {
-                updateWrapper.set("item_id", req.getItemId());
+            if (req.getItemKey() != null) {
+                updateWrapper.set("item_key", req.getItemKey());
             }
             if (req.getSortNum() != null) {
                 updateWrapper.set("sort_num", req.getSortNum());
