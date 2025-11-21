@@ -29,7 +29,7 @@ public class StudentLinkedListAlgorithmVisualizationServiceImpl implements Stude
         // 第一步：创建初始链表
         List<ListNode> nodeList = new ArrayList<>();
         for (int i = 0; i < array.length; i++) {
-            nodeList.add(new ListNode(array[i], i));
+            nodeList.add(new ListNode(array[i], i, null, i));
         }
 
         // 连接节点
@@ -43,7 +43,7 @@ public class StudentLinkedListAlgorithmVisualizationServiceImpl implements Stude
         steps.add(new LinkedListAlgorithmStep(copyNodeList(nodeList), new ArrayList<>(), "初始化链表: " + arrayToString(array)));
 
         // 第二步：创建新节点
-        ListNode newNode = new ListNode(value, null); // null表示新节点还没有在链表中的位置
+        ListNode newNode = new ListNode(value, null, null, 0); // 新节点将成为第0个节点
         nodeList.add(0, newNode);
         List<ListNode> nodeListWithNewNode = copyNodeList(nodeList);
 
@@ -55,6 +55,8 @@ public class StudentLinkedListAlgorithmVisualizationServiceImpl implements Stude
             if (nodeListWithNewNode.get(i).getNextIndex() != null) {
                 nodeListWithNewNode.get(i).setNextIndex(nodeListWithNewNode.get(i).getNextIndex() + 1);
             }
+            // 更新指针索引
+            nodeListWithNewNode.get(i).setPointerIndex(i);
         }
 
         steps.add(new LinkedListAlgorithmStep(nodeListWithNewNode, List.of(0), "创建新节点: " + value));
@@ -92,7 +94,7 @@ public class StudentLinkedListAlgorithmVisualizationServiceImpl implements Stude
         // 第一步：创建初始链表
         List<ListNode> nodeList = new ArrayList<>();
         for (int i = 0; i < array.length; i++) {
-            nodeList.add(new ListNode(array[i], i));
+            nodeList.add(new ListNode(array[i], i, null, i));
         }
 
         // 连接节点
@@ -106,9 +108,9 @@ public class StudentLinkedListAlgorithmVisualizationServiceImpl implements Stude
         steps.add(new LinkedListAlgorithmStep(copyNodeList(nodeList), new ArrayList<>(), "初始化链表: " + arrayToString(array)));
 
         // 第二步：创建新节点
-        ListNode newNode = new ListNode(value, null); // null表示新节点还没有在链表中的位置
+        int newNodeIndex = nodeList.size();
+        ListNode newNode = new ListNode(value, null, null, newNodeIndex); // 新节点将成为最后一个节点
         nodeList.add(newNode);
-        int newNodeIndex = nodeList.size() - 1;
 
         // 更新新节点的索引
         if (newNodeIndex > 0) {
@@ -144,7 +146,7 @@ public class StudentLinkedListAlgorithmVisualizationServiceImpl implements Stude
         // 第一步：创建初始链表
         List<ListNode> nodeList = new ArrayList<>();
         for (int i = 0; i < array.length; i++) {
-            nodeList.add(new ListNode(array[i], i));
+            nodeList.add(new ListNode(array[i], i, null, i));
         }
 
         // 连接节点
@@ -188,7 +190,7 @@ public class StudentLinkedListAlgorithmVisualizationServiceImpl implements Stude
                 nodeList.get(0).setPrevIndex(null);
                 steps.add(new LinkedListAlgorithmStep(copyNodeList(nodeList), List.of(0), "更新新头节点的prev指针为null"));
             }
-        } else if (deleteIndex == nodeList.size() - 1) {
+        } else if (deleteIndex == nodeList.size()) {
             // 删除尾节点
             int tailIndex = nodeList.size() - 1;
             nodeList.remove(tailIndex);
@@ -205,7 +207,7 @@ public class StudentLinkedListAlgorithmVisualizationServiceImpl implements Stude
             steps.add(new LinkedListAlgorithmStep(copyNodeList(nodeList), List.of(deleteIndex - 1, deleteIndex, deleteIndex + 1), "删除中间节点"));
 
             // 更新前后节点的指针
-            if (deleteIndex > 0 && deleteIndex < nodeList.size()) {
+            if (deleteIndex > 0 && deleteIndex < nodeList.size() + 1) {  // 注意这里nodeList已经删除了一个元素
                 nodeList.get(deleteIndex - 1).setNextIndex(deleteIndex);
             }
             if (deleteIndex < nodeList.size()) {
@@ -227,6 +229,9 @@ public class StudentLinkedListAlgorithmVisualizationServiceImpl implements Stude
             } else {
                 nodeList.get(i).setNextIndex(null);
             }
+            
+            // 更新指针索引
+            nodeList.get(i).setPointerIndex(i);
         }
 
         steps.add(new LinkedListAlgorithmStep(copyNodeList(nodeList), new ArrayList<>(), "完成删除节点操作"));
@@ -248,7 +253,7 @@ public class StudentLinkedListAlgorithmVisualizationServiceImpl implements Stude
         // 第一步：创建初始链表
         List<ListNode> nodeList = new ArrayList<>();
         for (int i = 0; i < array.length; i++) {
-            nodeList.add(new ListNode(array[i], i));
+            nodeList.add(new ListNode(array[i], i, null, i));
         }
 
         // 连接节点
@@ -267,15 +272,32 @@ public class StudentLinkedListAlgorithmVisualizationServiceImpl implements Stude
             return steps;
         }
 
-        // 使用三指针法反转链表
-        for (int i = 0; i < nodeList.size(); i++) {
-            Integer nextIndex = nodeList.get(i).getNextIndex();
-            Integer prevIndex = nodeList.get(i).getPrevIndex();
-            nodeList.get(i).setNextIndex(prevIndex);
-            nodeList.get(i).setPrevIndex(nextIndex);
+        // 使用双指针法反转链表，详细展示每一步
+        steps.add(new LinkedListAlgorithmStep(copyNodeList(nodeList), new ArrayList<>(), "开始使用双指针法反转链表"));
+        
+        List<ListNode> workingList = copyNodeList(nodeList);
+        steps.add(new LinkedListAlgorithmStep(copyNodeList(workingList), new ArrayList<>(), "创建工作副本用于演示反转过程"));
+        
+        // 反转过程：逐一处理每个节点
+        for (int i = 0; i < workingList.size(); i++) {
+            ListNode node = workingList.get(i);
+            Integer nextIndex = node.getNextIndex();
+            Integer prevIndex = node.getPrevIndex();
+            
+            // 显示当前要处理的节点
+            steps.add(new LinkedListAlgorithmStep(copyNodeList(workingList), List.of(i), 
+                       "处理节点" + i + "，当前next指向" + nextIndex + "，prev指向" + prevIndex));
+            
+            // 交换next和prev指针
+            node.setNextIndex(prevIndex);
+            node.setPrevIndex(nextIndex);
+            
+            // 显示交换后的结果
+            steps.add(new LinkedListAlgorithmStep(copyNodeList(workingList), List.of(i), 
+                       "节点" + i + "指针已交换，现在next指向" + node.getNextIndex() + "，prev指向" + node.getPrevIndex()));
         }
-
-        steps.add(new LinkedListAlgorithmStep(copyNodeList(nodeList), new ArrayList<>(), "完成链表反转"));
+        
+        steps.add(new LinkedListAlgorithmStep(copyNodeList(workingList), new ArrayList<>(), "链表反转完成"));
 
         return steps;
     }
@@ -294,7 +316,7 @@ public class StudentLinkedListAlgorithmVisualizationServiceImpl implements Stude
         // 第一步：创建初始链表
         List<ListNode> nodeList = new ArrayList<>();
         for (int i = 0; i < array.length; i++) {
-            nodeList.add(new ListNode(array[i], i));
+            nodeList.add(new ListNode(array[i], i, null, i));
         }
 
         // 连接节点
@@ -361,7 +383,7 @@ public class StudentLinkedListAlgorithmVisualizationServiceImpl implements Stude
         // 第一步：创建初始链表
         List<ListNode> nodeList = new ArrayList<>();
         for (int i = 0; i < array.length; i++) {
-            nodeList.add(new ListNode(array[i], i));
+            nodeList.add(new ListNode(array[i], i, null, i));
         }
 
         // 连接节点
@@ -432,7 +454,7 @@ public class StudentLinkedListAlgorithmVisualizationServiceImpl implements Stude
     private List<ListNode> copyNodeList(List<ListNode> original) {
         List<ListNode> copy = new ArrayList<>();
         for (ListNode node : original) {
-            copy.add(new ListNode(node.getValue(), node.getPrevIndex(), node.getNextIndex()));
+            copy.add(new ListNode(node.getValue(), node.getPrevIndex(), node.getNextIndex(), node.getPointerIndex()));
         }
         return copy;
     }

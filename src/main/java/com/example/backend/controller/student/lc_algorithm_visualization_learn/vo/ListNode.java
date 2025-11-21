@@ -13,6 +13,9 @@ public class ListNode {
 
     // 后继节点索引
     private Integer nextIndex;
+    
+    // 当前节点的指针索引（节点在链表中的位置）
+    private Integer pointerIndex;
 
     public ListNode() {
     }
@@ -26,6 +29,13 @@ public class ListNode {
     public ListNode(Integer value, Integer prevIndex) {
         this.value = value;
         this.prevIndex = prevIndex;
+    }
+    
+    public ListNode(Integer value, Integer prevIndex, Integer nextIndex, Integer pointerIndex) {
+        this.value = value;
+        this.prevIndex = prevIndex;
+        this.nextIndex = nextIndex;
+        this.pointerIndex = pointerIndex;
     }
 
     public Integer getValue() {
@@ -50,5 +60,13 @@ public class ListNode {
 
     public void setNextIndex(Integer nextIndex) {
         this.nextIndex = nextIndex;
+    }
+    
+    public Integer getPointerIndex() {
+        return pointerIndex;
+    }
+    
+    public void setPointerIndex(Integer pointerIndex) {
+        this.pointerIndex = pointerIndex;
     }
 }
