@@ -53,7 +53,7 @@ public class StudentTreeAlgorithmVisualizationServiceImpl implements StudentTree
     private int generateNodeId() {
         return nodeIdGenerator.getAndIncrement();
     }
-
+    
     /**
      * 中序遍历可视化
      * 对二叉树进行中序遍历，并记录整个过程
