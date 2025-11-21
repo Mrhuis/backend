@@ -1,6 +1,7 @@
 package com.example.backend.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -21,9 +22,10 @@ public class User {
     private String userKey;
     
     /**
-     * 登录用户名（唯一）
+     * 登录账号（唯一）
      */
-    private String username;
+    @TableField("account")
+    private String account;
     
     /**
      * 加密密码（如bcrypt哈希存储）

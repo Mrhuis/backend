@@ -57,9 +57,9 @@ public class AdminUserManageServiceImpl implements AdminUserManageService {
             queryWrapper.like("user_key", req.getUserKey());
         }
         
-        // 根据username查询
+        // 根据account查询
         if (StringUtils.hasText(req.getUsername())) {
-            queryWrapper.like("username", req.getUsername());
+            queryWrapper.like("account", req.getUsername());
         }
         
         // 根据role查询
@@ -96,9 +96,9 @@ public class AdminUserManageServiceImpl implements AdminUserManageService {
             queryWrapper.like("user_key", req.getUserKey());
         }
         
-        // 根据username查询
+        // 根据account查询
         if (StringUtils.hasText(req.getUsername())) {
-            queryWrapper.like("username", req.getUsername());
+            queryWrapper.like("account", req.getUsername());
         }
         
         // 根据role查询
@@ -124,6 +124,8 @@ public class AdminUserManageServiceImpl implements AdminUserManageService {
         try {
             User user = new User();
             BeanUtils.copyProperties(req, user);
+            // 手动映射username到account字段
+            user.setAccount(req.getUsername());
             user.setCreatedAt(LocalDateTime.now());
             user.setUpdatedAt(LocalDateTime.now());
             return userMapper.insert(user) > 0;
@@ -138,6 +140,8 @@ public class AdminUserManageServiceImpl implements AdminUserManageService {
         try {
             User user = new User();
             BeanUtils.copyProperties(req, user);
+            // 手动映射username到account字段
+            user.setAccount(req.getUsername());
             user.setUpdatedAt(LocalDateTime.now());
             
             UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
@@ -166,6 +170,10 @@ public class AdminUserManageServiceImpl implements AdminUserManageService {
             if (user != null) {
                 AdminUserQueryDetailVo vo = new AdminUserQueryDetailVo();
                 BeanUtils.copyProperties(user, vo);
+                // 手动映射account到username字段
+                log.debug("用户ID: {}, account字段值: {}", id, user.getAccount());
+                vo.setUsername(user.getAccount());
+                log.debug("设置username后的值: {}", vo.getUsername());
                 return vo;
             }
             return null;
@@ -188,7 +196,7 @@ public class AdminUserManageServiceImpl implements AdminUserManageService {
         return users.stream().map(user -> {
             AdminSimpleUserVo vo = new AdminSimpleUserVo();
             vo.setId(user.getId());
-            vo.setUsername(user.getUsername());
+            vo.setUsername(user.getAccount());
             vo.setUserKey(user.getUserKey());
             vo.setNickname(user.getNickname());
             vo.setRole(user.getRole());
@@ -210,7 +218,7 @@ public class AdminUserManageServiceImpl implements AdminUserManageService {
         if (user != null) {
             AdminUserBasicInfoVo vo = new AdminUserBasicInfoVo();
             vo.setUserKey(user.getUserKey());
-            vo.setUsername(user.getUsername());
+            vo.setUsername(user.getAccount());
             vo.setNickname(user.getNickname());
             return vo;
         }
@@ -231,6 +239,10 @@ public class AdminUserManageServiceImpl implements AdminUserManageService {
         if (user != null) {
             AdminUserQueryDetailVo vo = new AdminUserQueryDetailVo();
             BeanUtils.copyProperties(user, vo);
+            // 手动映射account到username字段
+            log.debug("用户userKey: {}, account字段值: {}", userKey, user.getAccount());
+            vo.setUsername(user.getAccount());
+            log.debug("设置username后的值: {}", vo.getUsername());
             return vo;
         }
         

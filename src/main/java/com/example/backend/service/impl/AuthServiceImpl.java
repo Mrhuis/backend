@@ -19,7 +19,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public Optional<User> authenticate(LoginRequestDto loginRequestDto) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("username", loginRequestDto.getUsername());
+        queryWrapper.eq("account", loginRequestDto.getUsername());
         User user = userMapper.selectOne(queryWrapper);
 
         if (user != null && user.getPassword().equals(loginRequestDto.getPassword())) {

@@ -4,7 +4,7 @@ import lombok.Data;
 
 /**
  * 用户基本信息VO
- * 用于通过user_key查询用户名和昵称
+ * 用于通过user_key查询账号和昵称
  */
 @Data
 public class AdminUserBasicInfoVo {
@@ -14,7 +14,7 @@ public class AdminUserBasicInfoVo {
     private String userKey;
     
     /**
-     * 登录用户名
+     * 登录账号
      */
     private String username;
     

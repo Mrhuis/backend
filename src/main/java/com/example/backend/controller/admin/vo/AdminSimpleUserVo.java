@@ -18,7 +18,7 @@ public class AdminSimpleUserVo {
     private Long id;
     
     /**
-     * 登录用户名（唯一）
+     * 登录账号（唯一）
      */
     private String username;
     
