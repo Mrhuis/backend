@@ -1,4 +1,3 @@
-
 server:
   port: 8080
   # Tomcat配置 - 针对大文件上传和下载优化
@@ -49,3 +48,7 @@ upload:
   resource:
     path: ../uploads/resources/
 
+# Python服务配置
+python:
+  service:
+    url: http://localhost:5000
