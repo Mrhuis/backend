@@ -18,4 +18,8 @@ public class TeacherExamPaperQuestionQueryListDto extends BaseEntity {
      */
     private String itemKey;
 
+    /**
+     * 创建者标识（创建试卷的教师user_key）
+     */
+    private String creatorKey;
 }

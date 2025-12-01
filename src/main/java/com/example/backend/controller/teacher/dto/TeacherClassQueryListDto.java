@@ -17,4 +17,9 @@ public class TeacherClassQueryListDto extends BaseEntity {
      * 班级名称（如"高一（3）班"）
      */
     private String name;
+
+    /**
+     * 创建者标识（创建班级的教师user_key）
+     */
+    private String creatorKey;
 }

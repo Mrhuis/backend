@@ -33,4 +33,9 @@ public class TeacherExamPaperDistributionQueryListDto extends BaseEntity {
      * 是否已回收（0-未回收，1-已回收，回收后学生无法再提交）
      */
     private Integer isRecycled;
+
+    /**
+     * 创建者标识（创建试卷的教师user_key）
+     */
+    private String creatorKey;
 }

@@ -109,7 +109,7 @@ public class TeacherClassStudentEnrollmentServiceImpl implements TeacherClassStu
             ClassStudentEnrollment classStudentEnrollment = new ClassStudentEnrollment();
             classStudentEnrollment.setClassKey(req.getClassKey());
             classStudentEnrollment.setUserKey(req.getUserKey());
-            classStudentEnrollment.setStatus(req.getStatus());
+            classStudentEnrollment.setStatus(0);
             classStudentEnrollment.setEnrolledAt(LocalDateTime.now());
 
             // 插入数据库

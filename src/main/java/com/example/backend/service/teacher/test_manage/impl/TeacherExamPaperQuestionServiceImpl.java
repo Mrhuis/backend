@@ -3,7 +3,9 @@ package com.example.backend.service.teacher.test_manage.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.backend.controller.teacher.dto.*;
+import com.example.backend.entity.ExamPaper;
 import com.example.backend.entity.ExamPaperQuestion;
+import com.example.backend.mapper.ExamPaperMapper;
 import com.example.backend.mapper.ExamPaperQuestionMapper;
 import com.example.backend.service.teacher.test_manage.TeacherExamPaperQuestionService;
 import org.slf4j.Logger;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 教师端试卷题目管理服务实现类
@@ -25,12 +28,32 @@ public class TeacherExamPaperQuestionServiceImpl implements TeacherExamPaperQues
     @Autowired
     private ExamPaperQuestionMapper examPaperQuestionMapper;
 
+    @Autowired
+    private ExamPaperMapper examPaperMapper;
+
     @Override
     public List<ExamPaperQuestion> getExamPaperQuestionList(TeacherExamPaperQuestionQueryListDto req) {
         try {
             QueryWrapper<ExamPaperQuestion> queryWrapper = new QueryWrapper<>();
 
             if (req != null) {
+                // 如果指定了创建者标识，需要先查询该创建者的试卷ID列表
+                if (StringUtils.hasText(req.getCreatorKey())) {
+                    QueryWrapper<ExamPaper> paperQueryWrapper = new QueryWrapper<>();
+                    paperQueryWrapper.eq("creator_key", req.getCreatorKey());
+                    List<ExamPaper> papers = examPaperMapper.selectList(paperQueryWrapper);
+                    List<Long> paperIds = papers.stream().map(ExamPaper::getId).collect(Collectors.toList());
+                    
+                    if (paperIds.isEmpty()) {
+                        // 如果没有找到该创建者的试卷，直接返回空列表
+                        log.info("创建者{}没有试卷，返回空列表", req.getCreatorKey());
+                        return new java.util.ArrayList<>();
+                    }
+                    
+                    // 只查询这些试卷的题目
+                    queryWrapper.in("paper_id", paperIds);
+                }
+
                 // 试卷ID精确查询
                 if (req.getPaperId() != null && req.getPaperId() > 0) {
                     queryWrapper.eq("paper_id", req.getPaperId());
@@ -68,6 +91,23 @@ public class TeacherExamPaperQuestionServiceImpl implements TeacherExamPaperQues
             QueryWrapper<ExamPaperQuestion> queryWrapper = new QueryWrapper<>();
 
             if (req != null) {
+                // 如果指定了创建者标识，需要先查询该创建者的试卷ID列表
+                if (StringUtils.hasText(req.getCreatorKey())) {
+                    QueryWrapper<ExamPaper> paperQueryWrapper = new QueryWrapper<>();
+                    paperQueryWrapper.eq("creator_key", req.getCreatorKey());
+                    List<ExamPaper> papers = examPaperMapper.selectList(paperQueryWrapper);
+                    List<Long> paperIds = papers.stream().map(ExamPaper::getId).collect(Collectors.toList());
+                    
+                    if (paperIds.isEmpty()) {
+                        // 如果没有找到该创建者的试卷，直接返回0
+                        log.info("创建者{}没有试卷，返回0", req.getCreatorKey());
+                        return 0L;
+                    }
+                    
+                    // 只查询这些试卷的题目
+                    queryWrapper.in("paper_id", paperIds);
+                }
+
                 // 试卷ID精确查询
                 if (req.getPaperId() != null && req.getPaperId() > 0) {
                     queryWrapper.eq("paper_id", req.getPaperId());

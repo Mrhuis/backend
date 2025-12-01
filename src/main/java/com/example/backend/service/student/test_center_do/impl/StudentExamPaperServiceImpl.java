@@ -79,7 +79,7 @@ public class StudentExamPaperServiceImpl extends ServiceImpl<ClassStudentEnrollm
                 vo.setDifficulty(examPaper.getDifficulty());
                 vo.setTotalScore(examPaper.getTotalScore());
                 vo.setTimeLimit(examPaper.getTimeLimit());
-                vo.setCreateUserId(examPaper.getCreateUserId());
+                vo.setCreatorKey(examPaper.getCreatorKey());
                 vo.setCreateTime(examPaper.getCreateTime());
                 vo.setUpdateTime(examPaper.getUpdateTime());
                 vo.setIsEnabled(examPaper.getIsEnabled());

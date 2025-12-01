@@ -33,7 +33,7 @@ public class TeacherExamPaperAddDto {
     private Integer timeLimit;
 
     /**
-     * 创建人ID
+     * 创建者标识（创建试卷的教师user_key）
      */
-    private Long createUserId;
+    private String creatorKey;
 }

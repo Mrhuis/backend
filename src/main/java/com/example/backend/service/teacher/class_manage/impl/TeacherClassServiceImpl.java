@@ -41,6 +41,11 @@ public class TeacherClassServiceImpl implements TeacherClassService {
                 if (StringUtils.hasText(req.getClassKey())) {
                     queryWrapper.eq("class_key", req.getClassKey());
                 }
+
+                // 创建者标识精确查询
+                if (StringUtils.hasText(req.getCreatorKey())) {
+                    queryWrapper.eq("creator_key", req.getCreatorKey());
+                }
             }
 
             // 按创建时间倒序排列
@@ -78,6 +83,11 @@ public class TeacherClassServiceImpl implements TeacherClassService {
                 if (StringUtils.hasText(req.getClassKey())) {
                     queryWrapper.eq("class_key", req.getClassKey());
                 }
+
+                // 创建者标识精确查询
+                if (StringUtils.hasText(req.getCreatorKey())) {
+                    queryWrapper.eq("creator_key", req.getCreatorKey());
+                }
             }
 
             log.info("执行班级计数查询，SQL条件: {}", queryWrapper.getTargetSql());
@@ -100,6 +110,7 @@ public class TeacherClassServiceImpl implements TeacherClassService {
             clazz.setClassKey(req.getClassKey());
             clazz.setName(req.getName());
             clazz.setInviteCode(req.getInviteCode());
+            clazz.setCreatorKey(req.getCreatorKey());
             clazz.setCreatedAt(LocalDateTime.now());
 
             // 插入数据库

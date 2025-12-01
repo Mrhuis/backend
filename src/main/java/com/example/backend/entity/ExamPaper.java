@@ -49,10 +49,10 @@ public class ExamPaper {
     private Integer timeLimit;
 
     /**
-     * 创建人ID（关联用户表）
+     * 创建者标识（创建试卷的教师user_key）
      */
-    @TableField("create_user_id")
-    private Long createUserId;
+    @TableField("creator_key")
+    private String creatorKey;
 
     /**
      * 创建时间

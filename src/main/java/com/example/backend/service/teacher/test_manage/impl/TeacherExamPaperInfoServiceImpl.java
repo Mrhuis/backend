@@ -51,6 +51,11 @@ public class TeacherExamPaperInfoServiceImpl implements TeacherExamPaperInfoServ
                 if (req.getIsEnabled() != null) {
                     queryWrapper.eq("is_enabled", req.getIsEnabled());
                 }
+
+                // 创建者标识精确查询
+                if (StringUtils.hasText(req.getCreatorKey())) {
+                    queryWrapper.eq("creator_key", req.getCreatorKey());
+                }
             }
 
             // 按创建时间倒序排列
@@ -98,6 +103,11 @@ public class TeacherExamPaperInfoServiceImpl implements TeacherExamPaperInfoServ
                 if (req.getIsEnabled() != null) {
                     queryWrapper.eq("is_enabled", req.getIsEnabled());
                 }
+
+                // 创建者标识精确查询
+                if (StringUtils.hasText(req.getCreatorKey())) {
+                    queryWrapper.eq("creator_key", req.getCreatorKey());
+                }
             }
 
             log.info("执行试卷计数查询，SQL条件: {}", queryWrapper.getTargetSql());
@@ -122,7 +132,7 @@ public class TeacherExamPaperInfoServiceImpl implements TeacherExamPaperInfoServ
             examPaper.setDifficulty(req.getDifficulty());
             examPaper.setTotalScore(req.getTotalScore());
             examPaper.setTimeLimit(req.getTimeLimit());
-            examPaper.setCreateUserId(req.getCreateUserId());
+            examPaper.setCreatorKey(req.getCreatorKey());
             examPaper.setCreateTime(LocalDateTime.now());
             examPaper.setUpdateTime(LocalDateTime.now());
             examPaper.setIsEnabled(0); // 默认启用

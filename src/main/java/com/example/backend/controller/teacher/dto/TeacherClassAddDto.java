@@ -22,4 +22,9 @@ public class TeacherClassAddDto extends BaseEntity {
      * 班级加入邀请码（唯一）
      */
     private String inviteCode;
+
+    /**
+     * 创建者标识（创建班级的教师user_key）
+     */
+    private String creatorKey;
 }

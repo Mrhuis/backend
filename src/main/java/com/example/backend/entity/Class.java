@@ -31,6 +31,11 @@ public class Class {
     private String inviteCode;
 
     /**
+     * 创建者标识（创建班级的教师user_key）
+     */
+    private String creatorKey;
+
+    /**
      * 班级创建时间
      */
     private LocalDateTime createdAt;
