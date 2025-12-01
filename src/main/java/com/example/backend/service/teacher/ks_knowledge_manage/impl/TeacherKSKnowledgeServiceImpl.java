@@ -9,6 +9,7 @@ import com.example.backend.entity.Plugin;
 import com.example.backend.mapper.KnowledgesMapper;
 import com.example.backend.service.admin.resource_manage.PluginService;
 import com.example.backend.service.teacher.ks_knowledge_manage.TeacherKSKnowledgeService;
+import com.example.backend.service.teacher.resource.ResourceAuditNotifier;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,9 @@ public class TeacherKSKnowledgeServiceImpl implements TeacherKSKnowledgeService 
     
     @Autowired
     private PluginService pluginService;
+    
+    @Autowired
+    private ResourceAuditNotifier resourceAuditNotifier;
 
     @Override
     public List<Knowledge> getKnowledgeList(TeacherKSKnowledgeQueryListDto req) {
@@ -70,7 +74,15 @@ public class TeacherKSKnowledgeServiceImpl implements TeacherKSKnowledgeService 
         knowledge.setKnowledgeKey(req.getKey());
         knowledge.setPluginKey(enabledPlugin != null ? enabledPlugin.getPluginKey() : "");
         knowledge.setStatus("PENDING"); // 教师端添加的知识点默认状态为PENDING
-        return knowledgesMapper.insert(knowledge) > 0;
+        boolean inserted = knowledgesMapper.insert(knowledge) > 0;
+        if (inserted) {
+            resourceAuditNotifier.notifyPendingAudit(
+                    req.getUploadedBy(),
+                    "知识点资源",
+                    knowledge.getName()
+            );
+        }
+        return inserted;
     }
 
     @Override

@@ -1,15 +1,18 @@
 package com.example.backend.service.student.class_manage.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.backend.controller.teacher.dto.TeacherAddMessageDto;
 import com.example.backend.entity.Class;
 import com.example.backend.entity.ClassStudentEnrollment;
 import com.example.backend.mapper.ClassMapper;
 import com.example.backend.mapper.ClassStudentEnrollmentMapper;
 import com.example.backend.service.student.class_manage.StudentClassService;
+import com.example.backend.service.teacher.message_center.TeacherMessageCenterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 
@@ -20,12 +23,16 @@ import java.time.LocalDateTime;
 public class StudentClassServiceImpl implements StudentClassService {
 
     private static final Logger log = LoggerFactory.getLogger(StudentClassServiceImpl.class);
+    private static final String SYSTEM_USER_KEY = "system";
 
     @Autowired
     private ClassMapper classMapper;
 
     @Autowired
     private ClassStudentEnrollmentMapper classStudentEnrollmentMapper;
+
+    @Autowired
+    private TeacherMessageCenterService teacherMessageCenterService;
 
     @Override
     public boolean joinClassByInviteCode(String inviteCode, String userKey) {
@@ -58,7 +65,11 @@ public class StudentClassServiceImpl implements StudentClassService {
 
             // 4. 插入数据库
             int result = classStudentEnrollmentMapper.insert(enrollment);
-            return result > 0;
+            if (result > 0) {
+                notifyClassCreatorOfJoinRequest(clazz, userKey);
+                return true;
+            }
+            return false;
         } catch (Exception e) {
             log.error("学生加入班级失败: inviteCode={}, userKey={}", inviteCode, userKey, e);
             throw new RuntimeException("加入班级失败: " + e.getMessage(), e);
@@ -84,6 +95,27 @@ public class StudentClassServiceImpl implements StudentClassService {
         } catch (Exception e) {
             log.error("学生退出班级失败: classKey={}, userKey={}", classKey, userKey, e);
             throw new RuntimeException("退出班级失败: " + e.getMessage(), e);
+        }
+    }
+
+    private void notifyClassCreatorOfJoinRequest(Class clazz, String studentKey) {
+        if (clazz == null || !StringUtils.hasText(clazz.getCreatorKey())) {
+            return;
+        }
+        try {
+            TeacherAddMessageDto messageDto = new TeacherAddMessageDto();
+            messageDto.setSenderKey(SYSTEM_USER_KEY);
+            messageDto.setReceiverKey(clazz.getCreatorKey());
+            messageDto.setMsgType(1);
+            messageDto.setSendTime(LocalDateTime.now());
+            String className = StringUtils.hasText(clazz.getName()) ? clazz.getName() : clazz.getClassKey();
+            messageDto.setContent(
+                    String.format("【班级审核】学生（Key %s）通过邀请码申请加入班级「%s」，请及时处理。", studentKey, className)
+            );
+            teacherMessageCenterService.addMessage(messageDto);
+        } catch (Exception ex) {
+            log.error("发送班级加入审核通知失败，classKey={}, creatorKey={}, studentKey={}",
+                    clazz.getClassKey(), clazz.getCreatorKey(), studentKey, ex);
         }
     }
 }

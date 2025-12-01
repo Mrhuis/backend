@@ -14,6 +14,7 @@ import com.example.backend.service.teacher.la_item_manage.TeacherLAItemService;
 import com.example.backend.service.teacher.la_item_manage.TeacherLAItemChapterResourcesService;
 import com.example.backend.service.teacher.la_item_manage.TeacherLAItemKnowledgeResourcesService;
 import com.example.backend.service.teacher.la_item_manage.TeacherLAItemTagResourceService;
+import com.example.backend.service.teacher.resource.ResourceAuditNotifier;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,9 @@ public class TeacherLAItemServiceImpl implements TeacherLAItemService {
     
     @Autowired
     private TeacherLAItemTagResourceService resourceTagService;
+    
+    @Autowired
+    private ResourceAuditNotifier resourceAuditNotifier;
 
     @Override
     public List<Item> getItemList(TeacherLAItemQueryListDto req) {
@@ -118,7 +122,12 @@ public class TeacherLAItemServiceImpl implements TeacherLAItemService {
             if (!tagResult) {
                 throw new RuntimeException("添加标签关联失败");
             }
-
+            
+            resourceAuditNotifier.notifyPendingAudit(
+                    req.getUploadedBy(),
+                    "学习活动-题目",
+                    req.getItemKey()
+            );
             return true;
         } catch (Exception e) {
             throw e; // 重新抛出异常以触发事务回滚

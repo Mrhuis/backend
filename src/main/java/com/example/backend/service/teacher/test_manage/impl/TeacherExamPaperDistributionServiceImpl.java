@@ -3,18 +3,26 @@ package com.example.backend.service.teacher.test_manage.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.backend.controller.teacher.dto.*;
+import com.example.backend.entity.Class;
+import com.example.backend.entity.ClassStudentEnrollment;
 import com.example.backend.entity.ExamPaper;
 import com.example.backend.entity.ExamPaperDistribution;
+import com.example.backend.mapper.ClassMapper;
+import com.example.backend.mapper.ClassStudentEnrollmentMapper;
 import com.example.backend.mapper.ExamPaperDistributionMapper;
 import com.example.backend.mapper.ExamPaperMapper;
+import com.example.backend.service.teacher.message_center.TeacherMessageCenterService;
 import com.example.backend.service.teacher.test_manage.TeacherExamPaperDistributionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,12 +33,23 @@ import java.util.stream.Collectors;
 public class TeacherExamPaperDistributionServiceImpl implements TeacherExamPaperDistributionService {
 
     private static final Logger log = LoggerFactory.getLogger(TeacherExamPaperDistributionServiceImpl.class);
+    private static final String SYSTEM_SENDER_KEY = "system";
+    private static final DateTimeFormatter NOTICE_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     @Autowired
     private ExamPaperDistributionMapper examPaperDistributionMapper;
 
     @Autowired
     private ExamPaperMapper examPaperMapper;
+
+    @Autowired
+    private ClassStudentEnrollmentMapper classStudentEnrollmentMapper;
+
+    @Autowired
+    private ClassMapper classMapper;
+
+    @Autowired
+    private TeacherMessageCenterService teacherMessageCenterService;
 
     @Override
     public List<ExamPaperDistribution> getExamPaperDistributionList(TeacherExamPaperDistributionQueryListDto req) {
@@ -165,6 +184,7 @@ public class TeacherExamPaperDistributionServiceImpl implements TeacherExamPaper
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean addExamPaperDistribution(TeacherExamPaperDistributionAddDto req) {
         try {
             // 创建试卷下发对象
@@ -181,13 +201,22 @@ public class TeacherExamPaperDistributionServiceImpl implements TeacherExamPaper
 
             // 插入数据库
             int result = examPaperDistributionMapper.insert(examPaperDistribution);
-            return result > 0;
+            if (result > 0) {
+                notifyClassStudents(false,
+                        examPaperDistribution.getClassKey(),
+                        examPaperDistribution.getPaperId(),
+                        examPaperDistribution.getStartTime(),
+                        examPaperDistribution.getDeadline());
+                return true;
+            }
+            return false;
         } catch (Exception e) {
             throw new RuntimeException("添加试卷下发失败", e);
         }
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean updateExamPaperDistribution(TeacherExamPaperDistributionUpdateDto req) {
         try {
             // 先查询试卷下发是否存在
@@ -225,7 +254,15 @@ public class TeacherExamPaperDistributionServiceImpl implements TeacherExamPaper
 
             // 执行更新
             int result = examPaperDistributionMapper.update(null, updateWrapper);
-            return result > 0;
+            if (result > 0) {
+                String targetClassKey = StringUtils.hasText(req.getClassKey()) ? req.getClassKey() : examPaperDistribution.getClassKey();
+                Long targetPaperId = req.getPaperId() != null ? req.getPaperId() : examPaperDistribution.getPaperId();
+                LocalDateTime targetStartTime = req.getStartTime() != null ? req.getStartTime() : examPaperDistribution.getStartTime();
+                LocalDateTime targetDeadline = req.getDeadline() != null ? req.getDeadline() : examPaperDistribution.getDeadline();
+                notifyClassStudents(true, targetClassKey, targetPaperId, targetStartTime, targetDeadline);
+                return true;
+            }
+            return false;
         } catch (Exception e) {
             throw new RuntimeException("更新试卷下发失败", e);
         }
@@ -278,6 +315,100 @@ public class TeacherExamPaperDistributionServiceImpl implements TeacherExamPaper
             return result > 0;
         } catch (Exception e) {
             throw new RuntimeException("回收试卷下发失败", e);
+        }
+    }
+
+    private void notifyClassStudents(boolean isUpdate, String classKey, Long paperId,
+                                     LocalDateTime startTime, LocalDateTime deadline) {
+        if (!StringUtils.hasText(classKey) || paperId == null) {
+            log.warn("缺少班级或试卷信息，跳过班级通知，classKey={}, paperId={}", classKey, paperId);
+            return;
+        }
+
+        List<String> studentKeys = fetchJoinedStudentKeys(classKey);
+        if (studentKeys.isEmpty()) {
+            log.info("班级{}暂无学生或均未通过审核，跳过消息通知", classKey);
+            return;
+        }
+
+        String messageContent = buildDistributionNotice(isUpdate, classKey, paperId, startTime, deadline);
+        LocalDateTime now = LocalDateTime.now();
+
+        for (String studentKey : studentKeys) {
+            TeacherAddMessageDto messageDto = new TeacherAddMessageDto();
+            messageDto.setSenderKey(SYSTEM_SENDER_KEY);
+            messageDto.setReceiverKey(studentKey);
+            messageDto.setContent(messageContent);
+            messageDto.setMsgType(1);
+            messageDto.setSendTime(now);
+
+            boolean success = teacherMessageCenterService.addMessage(messageDto);
+            if (!success) {
+                throw new RuntimeException("发送班级消息失败，studentKey=" + studentKey);
+            }
+        }
+
+        log.info("已向班级{}的{}名学生发送{}通知", classKey, studentKeys.size(), isUpdate ? "更新" : "发布");
+    }
+
+    private List<String> fetchJoinedStudentKeys(String classKey) {
+        QueryWrapper<ClassStudentEnrollment> wrapper = new QueryWrapper<>();
+        wrapper.eq("class_key", classKey);
+        wrapper.eq("status", 1);
+        List<ClassStudentEnrollment> enrollments = classStudentEnrollmentMapper.selectList(wrapper);
+        if (enrollments == null || enrollments.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return enrollments.stream()
+                .map(ClassStudentEnrollment::getUserKey)
+                .filter(StringUtils::hasText)
+                .collect(Collectors.toList());
+    }
+
+    private String buildDistributionNotice(boolean isUpdate, String classKey, Long paperId,
+                                           LocalDateTime startTime, LocalDateTime deadline) {
+        String actionText = isUpdate ? "更新" : "发布";
+        String className = resolveClassName(classKey);
+        String paperName = resolvePaperName(paperId);
+        String startText = formatNoticeTime(startTime);
+        String deadlineText = deadline != null ? formatNoticeTime(deadline) : "无截止时间";
+        return String.format("【考试通知】%s已%s试卷「%s」。开始时间：%s，截止：%s。请按时参加考试。",
+                className, actionText, paperName, startText, deadlineText);
+    }
+
+    private String resolveClassName(String classKey) {
+        if (!StringUtils.hasText(classKey)) {
+            return "该班级";
+        }
+        QueryWrapper<Class> wrapper = new QueryWrapper<>();
+        wrapper.eq("class_key", classKey);
+        Class clazz = classMapper.selectOne(wrapper);
+        if (clazz != null && StringUtils.hasText(clazz.getName())) {
+            return clazz.getName();
+        }
+        return classKey;
+    }
+
+    private String resolvePaperName(Long paperId) {
+        if (paperId == null) {
+            return "试卷";
+        }
+        ExamPaper paper = examPaperMapper.selectById(paperId);
+        if (paper != null && StringUtils.hasText(paper.getPaperName())) {
+            return paper.getPaperName();
+        }
+        return "试卷" + paperId;
+    }
+
+    private String formatNoticeTime(LocalDateTime time) {
+        if (time == null) {
+            return "未设定";
+        }
+        try {
+            return NOTICE_DATETIME_FORMATTER.format(time);
+        } catch (Exception ex) {
+            log.warn("时间格式化失败，fallback为ISO字符串", ex);
+            return time.toString();
         }
     }
 }

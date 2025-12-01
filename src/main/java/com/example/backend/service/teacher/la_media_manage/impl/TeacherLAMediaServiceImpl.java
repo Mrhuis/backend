@@ -12,6 +12,7 @@ import com.example.backend.service.teacher.la_media_manage.TeacherLAMediaService
 import com.example.backend.service.teacher.la_media_manage.TeacherLAMediaChapterResourcesService;
 import com.example.backend.service.teacher.la_media_manage.TeacherLAMediaKnowledgeResourcesService;
 import com.example.backend.service.teacher.la_media_manage.TeacherLAMediaTagResourceService;
+import com.example.backend.service.teacher.resource.ResourceAuditNotifier;
 import com.example.backend.tool.DirectoryTool;
 import com.example.backend.tool.media.MultipartFileTool;
 import org.slf4j.Logger;
@@ -52,6 +53,9 @@ public class TeacherLAMediaServiceImpl implements TeacherLAMediaService {
     
     @Autowired
     private TeacherLAMediaTagResourceService resourceTagService;
+    
+    @Autowired
+    private ResourceAuditNotifier resourceAuditNotifier;
 
     @Override
     public List<MediaAssets> getLAMediaList(TeacherLAMediaQueryListDto req) {
@@ -211,7 +215,12 @@ public class TeacherLAMediaServiceImpl implements TeacherLAMediaService {
             if (!tagResult) {
                 throw new RuntimeException("添加标签关联失败");
             }
-
+            
+            resourceAuditNotifier.notifyPendingAudit(
+                    req.getUploadedBy(),
+                    "学习活动-媒体",
+                    req.getFileName()
+            );
             return true;
         } catch (Exception e) {
             throw e; // 重新抛出异常以触发事务回滚
