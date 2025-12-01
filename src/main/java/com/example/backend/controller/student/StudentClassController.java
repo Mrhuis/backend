@@ -2,6 +2,7 @@ package com.example.backend.controller.student;
 
 import com.example.backend.common.Result;
 import com.example.backend.controller.student.dto.StudentJoinClassDto;
+import com.example.backend.controller.student.dto.StudentLeaveClassDto;
 import com.example.backend.service.student.class_manage.StudentClassService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,37 @@ public class StudentClassController {
             }
         } catch (Exception e) {
             log.error("学生加入班级失败", e);
+            return Result.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 学生退出班级
+     *
+     * @param req 退出班级请求（包含classKey和userKey）
+     * @return 退出结果
+     */
+    @PostMapping("/leave")
+    public Result<String> leaveClass(@RequestBody StudentLeaveClassDto req) {
+        try {
+            log.info("收到学生退出班级请求，classKey: {}, userKey: {}", req.getClassKey(), req.getUserKey());
+
+            if (!StringUtils.hasText(req.getClassKey())) {
+                return Result.error("班级标识不能为空");
+            }
+
+            if (!StringUtils.hasText(req.getUserKey())) {
+                return Result.error("用户标识不能为空");
+            }
+
+            boolean success = studentClassService.leaveClass(req.getClassKey(), req.getUserKey());
+            if (success) {
+                return Result.success("已退出班级");
+            } else {
+                return Result.error("退出班级失败");
+            }
+        } catch (Exception e) {
+            log.error("学生退出班级失败", e);
             return Result.error(e.getMessage());
         }
     }

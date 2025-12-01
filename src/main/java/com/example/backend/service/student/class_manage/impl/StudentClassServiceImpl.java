@@ -64,5 +64,27 @@ public class StudentClassServiceImpl implements StudentClassService {
             throw new RuntimeException("加入班级失败: " + e.getMessage(), e);
         }
     }
+
+    @Override
+    public boolean leaveClass(String classKey, String userKey) {
+        try {
+            // 查询学生是否在该班级中
+            QueryWrapper<ClassStudentEnrollment> enrollmentQueryWrapper = new QueryWrapper<>();
+            enrollmentQueryWrapper.eq("class_key", classKey);
+            enrollmentQueryWrapper.eq("user_key", userKey);
+            ClassStudentEnrollment enrollment = classStudentEnrollmentMapper.selectOne(enrollmentQueryWrapper);
+
+            if (enrollment == null) {
+                throw new RuntimeException("您尚未加入该班级");
+            }
+
+            // 直接删除该关系
+            int result = classStudentEnrollmentMapper.delete(enrollmentQueryWrapper);
+            return result > 0;
+        } catch (Exception e) {
+            log.error("学生退出班级失败: classKey={}, userKey={}", classKey, userKey, e);
+            throw new RuntimeException("退出班级失败: " + e.getMessage(), e);
+        }
+    }
 }
 
