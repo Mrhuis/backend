@@ -10,6 +10,7 @@ import com.example.backend.entity.Plugin;
 import com.example.backend.mapper.KnowledgesMapper;
 import com.example.backend.service.admin.ks_knowledge_manage.AdminKSKnowledgeService;
 import com.example.backend.service.admin.resource_manage.PluginService;
+import com.example.backend.service.teacher.resource.ResourceAuditNotifier;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,6 +45,9 @@ public class AdminKSKnowledgeServiceImpl implements AdminKSKnowledgeService {
     
     @Autowired
     private ObjectMapper objectMapper;
+    
+    @Autowired
+    private ResourceAuditNotifier resourceAuditNotifier;
 
     @Override
     public List<Knowledge> getKnowledgeList(AdminKSKnowledgeQueryListDto req) {
@@ -276,6 +280,21 @@ public class AdminKSKnowledgeServiceImpl implements AdminKSKnowledgeService {
             
             // 执行更新
             int result = knowledgesMapper.update(null, updateWrapper);
+
+            // 审核结果通知上传者（知识点资源），仅在状态发生变更且存在上传者时发送
+            if (result > 0
+                    && StringUtils.hasText(existingKnowledge.getUploadedBy())
+                    && StringUtils.hasText(req.getStatus())
+                    && !req.getStatus().equals(existingKnowledge.getStatus())) {
+                resourceAuditNotifier.notifyAuditResult(
+                        existingKnowledge.getUploadedBy(),
+                        "知识点资源",
+                        existingKnowledge.getName(),
+                        req.getStatus(),
+                        null  // 暂无管理员user_key，使用system作为发送者
+                );
+            }
+
             return result > 0;
         } catch (Exception e) {
             throw new RuntimeException("更新知识点失败", e);

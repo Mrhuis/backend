@@ -125,6 +125,7 @@ public class TeacherExamPaperInfoController {
     @PostMapping("/add")
     public Result<String> addExamPaper(@RequestBody TeacherExamPaperAddDto req) {
         try {
+            log.info("收到创建试卷请求，参数: {}", req);
             boolean success = teacherExamPaperInfoService.addExamPaper(req);
             if (success) {
                 return Result.success("试卷创建成功");
@@ -132,7 +133,10 @@ public class TeacherExamPaperInfoController {
                 return Result.error("试卷创建失败");
             }
         } catch (Exception e) {
-            return Result.error("创建试卷时发生错误: " + e.getMessage());
+            log.error("创建试卷时发生异常", e);
+            // 尽量把根因信息透传给前端，方便排查
+            String rootMsg = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+            return Result.error("创建试卷时发生错误: " + rootMsg);
         }
     }
 

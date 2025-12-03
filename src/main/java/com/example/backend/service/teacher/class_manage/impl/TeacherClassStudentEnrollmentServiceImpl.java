@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.backend.controller.teacher.dto.*;
 import com.example.backend.entity.ClassStudentEnrollment;
+import com.example.backend.controller.teacher.dto.TeacherAddMessageDto;
+import com.example.backend.service.teacher.message_center.TeacherMessageCenterService;
 import com.example.backend.mapper.ClassStudentEnrollmentMapper;
 import com.example.backend.service.teacher.class_manage.TeacherClassStudentEnrollmentService;
 import org.slf4j.Logger;
@@ -25,6 +27,9 @@ public class TeacherClassStudentEnrollmentServiceImpl implements TeacherClassStu
 
     @Autowired
     private ClassStudentEnrollmentMapper classStudentEnrollmentMapper;
+
+    @Autowired
+    private TeacherMessageCenterService teacherMessageCenterService;
 
     @Override
     public List<ClassStudentEnrollment> getClassStudentEnrollmentList(TeacherClassStudentEnrollmentQueryListDto req) {
@@ -146,6 +151,17 @@ public class TeacherClassStudentEnrollmentServiceImpl implements TeacherClassStu
 
             // 执行更新
             int result = classStudentEnrollmentMapper.update(null, updateWrapper);
+
+            // 如果状态发生了变化，并且是审批相关状态，给申请学生发送系统消息
+            if (result > 0 && req.getStatus() != null
+                    && classStudentEnrollment.getStatus() != null
+                    && !req.getStatus().equals(classStudentEnrollment.getStatus())) {
+                sendApprovalResultMessage(classStudentEnrollment.getUserKey(),
+                        classStudentEnrollment.getClassKey(),
+                        classStudentEnrollment.getStatus(),
+                        req.getStatus());
+            }
+
             return result > 0;
         } catch (Exception e) {
             throw new RuntimeException("更新班级学生关系失败", e);
@@ -175,6 +191,35 @@ public class TeacherClassStudentEnrollmentServiceImpl implements TeacherClassStu
             return classStudentEnrollmentMapper.selectById(id);
         } catch (Exception e) {
             throw new RuntimeException("获取班级学生关系详情失败", e);
+        }
+    }
+
+    /**
+     * 向学生发送入班审批结果系统消息
+     *
+     * status: 0-待审核，1-已加入，其它值（如2）可视为拒绝/移除
+     */
+    private void sendApprovalResultMessage(String studentKey, String classKey, Integer oldStatus, Integer newStatus) {
+        if (!StringUtils.hasText(studentKey)) {
+            return;
+        }
+        // 只处理从“待审核”变更为其他状态的情况
+        if (oldStatus != null && oldStatus == 0 && newStatus != null && !oldStatus.equals(newStatus)) {
+            String resultText;
+            if (newStatus == 1) {
+                resultText = "已通过，您已成功加入该班级。";
+            } else {
+                resultText = "未通过，您无法加入该班级。";
+            }
+
+            TeacherAddMessageDto messageDto = new TeacherAddMessageDto();
+            messageDto.setSenderKey("system");
+            messageDto.setReceiverKey(studentKey);
+            messageDto.setMsgType(1);
+            messageDto.setSendTime(LocalDateTime.now());
+            messageDto.setContent(String.format("【入班审核结果】您对班级（Key %s）的加入申请%s", classKey, resultText));
+
+            teacherMessageCenterService.addMessage(messageDto);
         }
     }
 }

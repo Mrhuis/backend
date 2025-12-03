@@ -9,6 +9,7 @@ import com.example.backend.entity.Plugin;
 import com.example.backend.mapper.ChapterMapper;
 import com.example.backend.service.admin.ks_chapter_manage.AdminKSChapterService;
 import com.example.backend.service.admin.resource_manage.PluginService;
+import com.example.backend.service.teacher.resource.ResourceAuditNotifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,9 @@ public class AdminKSChapterServiceImpl implements AdminKSChapterService {
 
     @Autowired
     private PluginService pluginService;
+    
+    @Autowired
+    private ResourceAuditNotifier resourceAuditNotifier;
 
     @Override
     public List<Chapter> getChapterList(AdminKSChapterQueryListDto req) {
@@ -330,6 +334,22 @@ public class AdminKSChapterServiceImpl implements AdminKSChapterService {
             
             int result = chapterMapper.updateById(updateChapter);
             log.info("章节更新完成，影响行数: {}", result);
+
+            // 审核结果通知上传者（章节资源），仅在状态发生变更且存在上传者时发送
+            if (result > 0 && updateChapter.getId() != null) {
+                Chapter latest = chapterMapper.selectById(updateChapter.getId());
+                if (latest != null
+                        && StringUtils.hasText(latest.getUploadedBy())
+                        && StringUtils.hasText(latest.getStatus())) {
+                    resourceAuditNotifier.notifyAuditResult(
+                            latest.getUploadedBy(),
+                            "章节资源",
+                            latest.getName(),
+                            latest.getStatus(),
+                            null  // 暂无管理员user_key，使用system作为发送者
+                    );
+                }
+            }
             
             return result > 0;
         } catch (Exception e) {

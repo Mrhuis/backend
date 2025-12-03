@@ -12,6 +12,7 @@ import com.example.backend.mapper.MediaAssetsMapper;
 import com.example.backend.mapper.TagResourceMapper;
 import com.example.backend.service.admin.la_media_manage.AdminLAMediaService;
 import com.example.backend.service.admin.resource_manage.PluginService;
+import com.example.backend.service.teacher.resource.ResourceAuditNotifier;
 import com.example.backend.tool.DirectoryTool;
 import com.example.backend.tool.media.MultipartFileTool;
 import org.slf4j.Logger;
@@ -63,6 +64,9 @@ public class AdminLAMediaServiceImpl implements AdminLAMediaService {
 
     @Autowired
     private AdminLAMediaTagResourceService resourceTagService;
+
+    @Autowired
+    private ResourceAuditNotifier resourceAuditNotifier;
 
     // 添加Mapper注入
     @Autowired
@@ -715,13 +719,28 @@ public class AdminLAMediaServiceImpl implements AdminLAMediaService {
     public boolean updateLAMediaStatus(Long id, String status) {
         try {
             MediaAssets mediaAssets = mediaAssetsMapper.selectById(id);
+            if (mediaAssets == null) {
+                log.warn("未找到ID为 {} 的媒体资源，无法更新状态", id);
+                return false;
+            }
             mediaAssets.setStatus(status);
-            mediaAssetsMapper.updateById(mediaAssets);
-            return true;
+            int result = mediaAssetsMapper.updateById(mediaAssets);
+
+            if (result > 0 && mediaAssets.getUploadedBy() != null && !mediaAssets.getUploadedBy().isEmpty()) {
+                // 审核结果通知上传者（学习活动-媒体）
+                resourceAuditNotifier.notifyAuditResult(
+                        mediaAssets.getUploadedBy(),
+                        "学习活动-媒体",
+                        mediaAssets.getFileName(),
+                        status,
+                        null  // 暂无管理员user_key，使用system作为发送者
+                );
+            }
+            return result > 0;
 
         } catch (Exception e) {
             log.error("更新媒体资源状态失败，id: {}, 错误: {}", id, e.getMessage(), e);
+            return false;
         }
-        return false;
     }
 }

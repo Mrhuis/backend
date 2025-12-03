@@ -10,6 +10,7 @@ import com.example.backend.entity.ResourceForm;
 import com.example.backend.mapper.ResourceFormMapper;
 import com.example.backend.service.admin.ks_resourceForm_manage.AdminKSResourceFormService;
 import com.example.backend.service.admin.resource_manage.PluginService;
+import com.example.backend.service.teacher.resource.ResourceAuditNotifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -35,6 +36,9 @@ public class AdminKSResourceFormServiceImpl implements AdminKSResourceFormServic
 
     @Autowired
     private PluginService pluginService;
+    
+    @Autowired
+    private ResourceAuditNotifier resourceAuditNotifier;
     @Override
     public List<ResourceForm> getResourceFormList(AdminKSResourceFormQueryListDto req) {
         try {
@@ -203,6 +207,23 @@ public class AdminKSResourceFormServiceImpl implements AdminKSResourceFormServic
             
             // 执行更新
             int result = resourceFormMapper.update(null, updateWrapper);
+
+            // 审核结果通知上传者（资源形式），仅在状态发生变更且存在上传者时发送
+            if (result > 0) {
+                ResourceForm latest = resourceFormMapper.selectById(req.getId());
+                if (latest != null
+                        && StringUtils.hasText(latest.getUploadedBy())
+                        && StringUtils.hasText(latest.getStatus())) {
+                    resourceAuditNotifier.notifyAuditResult(
+                            latest.getUploadedBy(),
+                            "资源形式",
+                            latest.getFormName(),
+                            latest.getStatus(),
+                            null  // 暂无管理员user_key，使用system作为发送者
+                    );
+                }
+            }
+
             return result > 0;
         } catch (Exception e) {
             throw new RuntimeException("更新失败", e);

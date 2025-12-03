@@ -33,6 +33,17 @@ public class AuthServiceImpl implements AuthService {
         return Optional.empty();
     }
 
+    @Override
+    public Optional<User> findByUserKey(String userKey) {
+        if (userKey == null || userKey.trim().isEmpty()) {
+            return Optional.empty();
+        }
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        wrapper.eq("user_key", userKey);
+        User user = userMapper.selectOne(wrapper);
+        return Optional.ofNullable(user);
+    }
+
     /**
      * 更新用户活跃状态相关字段：
      * - last_active_time：最后活跃时间

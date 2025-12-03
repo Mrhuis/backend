@@ -139,9 +139,12 @@ public class TeacherExamPaperInfoServiceImpl implements TeacherExamPaperInfoServ
 
             // 插入数据库
             int result = examPaperMapper.insert(examPaper);
+            log.info("插入试卷结果: {}, 插入后的ID: {}", result, examPaper.getId());
             return result > 0;
         } catch (Exception e) {
-            throw new RuntimeException("添加试卷失败", e);
+            // 打印详细异常信息，便于排查如唯一约束、非空约束等数据库错误
+            log.error("添加试卷失败, 请求参数: {}", req, e);
+            throw new RuntimeException("添加试卷失败: " + e.getMessage(), e);
         }
     }
 

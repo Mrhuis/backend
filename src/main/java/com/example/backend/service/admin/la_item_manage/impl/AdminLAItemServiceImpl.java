@@ -12,8 +12,8 @@ import com.example.backend.service.admin.la_item_manage.AdminLAItemChapterResour
 import com.example.backend.service.admin.la_item_manage.AdminLAItemKnowledgeResourcesService;
 import com.example.backend.service.admin.la_item_manage.AdminLAItemTagResourceService;
 import com.example.backend.service.admin.la_item_manage.AdminLAItemService;
-
 import com.example.backend.service.admin.resource_manage.PluginService;
+import com.example.backend.service.teacher.resource.ResourceAuditNotifier;
 
 import com.example.backend.tool.DirectoryTool;
 import com.example.backend.tool.media.MultipartFileTool;
@@ -67,6 +67,9 @@ public class AdminLAItemServiceImpl implements AdminLAItemService {
 
     @Autowired
     private AdminLAItemTagResourceService resourceTagService;
+    
+    @Autowired
+    private ResourceAuditNotifier resourceAuditNotifier;
 
     // 添加Mapper注入
     @Autowired
@@ -723,14 +726,29 @@ public class AdminLAItemServiceImpl implements AdminLAItemService {
     public boolean updateLAItemStatus(AdminLAItemUpdateStatusDto req) {
         try {
             Item item = itemsMapper.selectById(req.getId());
+            if (item == null) {
+                log.warn("未找到ID为 {} 的习题资源，无法更新状态", req.getId());
+                return false;
+            }
             item.setStatus(req.getStatus());
-            itemsMapper.updateById(item);
-            return true;
+            int result = itemsMapper.updateById(item);
+
+            if (result > 0 && item.getUploadedBy() != null && !item.getUploadedBy().isEmpty()) {
+                // 审核结果通知上传者（学习活动-题目）
+                resourceAuditNotifier.notifyAuditResult(
+                        item.getUploadedBy(),
+                        "学习活动-题目",
+                        item.getItemKey(),
+                        req.getStatus(),
+                        null  // 暂无管理员user_key，使用system作为发送者
+                );
+            }
+            return result > 0;
 
         } catch (Exception e) {
             log.error("更新习题资源状态失败，id: {}, 错误: {}", req.getId(), e.getMessage(), e);
+            return false;
         }
-        return false;
     }
 
     @Override

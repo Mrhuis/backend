@@ -199,7 +199,7 @@ public class StudentAnswerServiceImpl extends ServiceImpl<StudentAnswerMapper, S
                     .filter(ct -> ct != null)
                     .max(LocalDateTime::compareTo)
                     .orElse(null));
-            
+
             // 如果存在未完成的记录
             if (hasIncomplete) {
                 vo.setGraded(false);
@@ -208,13 +208,13 @@ public class StudentAnswerServiceImpl extends ServiceImpl<StudentAnswerMapper, S
             } else {
                 // 所有记录都已完成
                 boolean graded = completedAnswers.stream().allMatch(answer -> answer.getScore() != null);
-                vo.setGraded(graded);
+            vo.setGraded(graded);
 
                 BigDecimal totalScore = completedAnswers.stream()
-                        .map(StudentAnswer::getScore)
-                        .filter(score -> score != null)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-                vo.setObtainedScore(totalScore);
+                    .map(StudentAnswer::getScore)
+                    .filter(score -> score != null)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            vo.setObtainedScore(totalScore);
                 vo.setCanViewDetail(true);
             }
 

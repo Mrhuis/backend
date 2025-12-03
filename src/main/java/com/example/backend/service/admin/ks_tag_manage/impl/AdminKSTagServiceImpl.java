@@ -10,6 +10,7 @@ import com.example.backend.entity.Tag;
 import com.example.backend.mapper.TagsMapper;
 import com.example.backend.service.admin.ks_tag_manage.AdminKSTagService;
 import com.example.backend.service.admin.resource_manage.PluginService;
+import com.example.backend.service.teacher.resource.ResourceAuditNotifier;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +41,9 @@ public class AdminKSTagServiceImpl implements AdminKSTagService {
 
     @Autowired
     private PluginService pluginService;
-
-
+    
+    @Autowired
+    private ResourceAuditNotifier resourceAuditNotifier;
 
     @Override
     public List<Tag> getTagList(AdminKSTagQueryListDto req) {
@@ -236,6 +238,23 @@ public class AdminKSTagServiceImpl implements AdminKSTagService {
 
             // 执行更新
             int result = tagsMapper.update(null, updateWrapper);
+
+            // 审核结果通知上传者（标签），仅在状态发生变更且存在上传者时发送
+            if (result > 0) {
+                Tag latest = tagsMapper.selectById(req.getId());
+                if (latest != null
+                        && StringUtils.hasText(latest.getUploadedBy())
+                        && StringUtils.hasText(latest.getStatus())) {
+                    resourceAuditNotifier.notifyAuditResult(
+                            latest.getUploadedBy(),
+                            "标签资源",
+                            latest.getTagContent(),
+                            latest.getStatus(),
+                            null  // 暂无管理员user_key，使用system作为发送者
+                    );
+                }
+            }
+
             return result > 0;
         } catch (Exception e) {
             throw new RuntimeException("更新标签失败", e);
