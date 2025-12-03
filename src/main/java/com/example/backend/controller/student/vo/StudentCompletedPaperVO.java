@@ -20,5 +20,9 @@ public class StudentCompletedPaperVO {
     private Integer questionCount;
     private BigDecimal obtainedScore;
     private Boolean graded;
+    /**
+     * 是否可以查看详情（如果存在is_complete=0的记录，则不能查看详情）
+     */
+    private Boolean canViewDetail;
 }
 

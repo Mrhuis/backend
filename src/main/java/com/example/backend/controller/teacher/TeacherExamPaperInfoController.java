@@ -1,16 +1,22 @@
 package com.example.backend.controller.teacher;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.backend.common.Result;
 import com.example.backend.common.vo.QueryListVo;
 import com.example.backend.controller.teacher.dto.*;
+import com.example.backend.controller.teacher.vo.TeacherExamPaperListVo;
 import com.example.backend.entity.ExamPaper;
+import com.example.backend.entity.ExamPaperDistribution;
+import com.example.backend.mapper.ExamPaperDistributionMapper;
 import com.example.backend.service.teacher.test_manage.TeacherExamPaperInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * ClassName: TeacherExamPaperInfoController
@@ -29,6 +35,9 @@ public class TeacherExamPaperInfoController {
 
     @Autowired
     private TeacherExamPaperInfoService teacherExamPaperInfoService;
+
+    @Autowired
+    private ExamPaperDistributionMapper examPaperDistributionMapper;
 
     /**
      * 获取试卷列表（支持分页和查询条件）
@@ -49,9 +58,51 @@ public class TeacherExamPaperInfoController {
             Long total = teacherExamPaperInfoService.getExamPapersCount(req);
             log.info("获取到试卷总数: {}", total);
 
+            // 转换为VO并检查批阅权限
+            LocalDateTime now = LocalDateTime.now();
+            List<TeacherExamPaperListVo> voList = examPapers.stream().map(paper -> {
+                TeacherExamPaperListVo vo = new TeacherExamPaperListVo();
+                // 复制ExamPaper的所有属性
+                vo.setId(paper.getId());
+                vo.setPaperName(paper.getPaperName());
+                vo.setSubject(paper.getSubject());
+                vo.setDifficulty(paper.getDifficulty());
+                vo.setTotalScore(paper.getTotalScore());
+                vo.setTimeLimit(paper.getTimeLimit());
+                vo.setCreatorKey(paper.getCreatorKey());
+                vo.setCreateTime(paper.getCreateTime());
+                vo.setUpdateTime(paper.getUpdateTime());
+                vo.setIsEnabled(paper.getIsEnabled());
+
+                // 检查是否可以批阅：查询该试卷的所有发布记录
+                QueryWrapper<ExamPaperDistribution> distributionQuery = new QueryWrapper<>();
+                distributionQuery.eq("paper_id", paper.getId());
+                List<ExamPaperDistribution> distributions = examPaperDistributionMapper.selectList(distributionQuery);
+
+                // 判断是否可以批阅：只要有一个发布记录的截止时间已过（或没有截止时间），就可以批阅
+                boolean canGrade = false;
+                if (!distributions.isEmpty()) {
+                    // 检查是否有至少一个发布记录的截止时间已过或没有截止时间
+                    for (ExamPaperDistribution distribution : distributions) {
+                        if (distribution.getDeadline() == null) {
+                            // 没有截止时间，可以批阅
+                            canGrade = true;
+                            break;
+                        } else if (now.isAfter(distribution.getDeadline())) {
+                            // 截止时间已过，可以批阅
+                            canGrade = true;
+                            break;
+                        }
+                    }
+                }
+                vo.setCanGrade(canGrade);
+
+                return vo;
+            }).collect(Collectors.toList());
+
             // 构建分页结果
             QueryListVo result = new QueryListVo();
-            result.setRecords(examPapers.stream().map(paper -> (Object) paper).collect(java.util.stream.Collectors.toList()));
+            result.setRecords(voList.stream().map(vo -> (Object) vo).collect(Collectors.toList()));
             result.setTotal(total);
             result.setCurrent(req.getPageIndex() != null ? req.getPageIndex() : 1);
             result.setSize(req.getPageSize() != null ? req.getPageSize() : 100);
@@ -72,7 +123,7 @@ public class TeacherExamPaperInfoController {
      * @return 添加结果
      */
     @PostMapping("/add")
-    public Result addExamPaper(@RequestBody TeacherExamPaperAddDto req) {
+    public Result<String> addExamPaper(@RequestBody TeacherExamPaperAddDto req) {
         try {
             boolean success = teacherExamPaperInfoService.addExamPaper(req);
             if (success) {
@@ -112,7 +163,7 @@ public class TeacherExamPaperInfoController {
      * @return 删除结果
      */
     @GetMapping("/delete/{id}")
-    public Result deleteExamPaper(@PathVariable Long id) {
+    public Result<String> deleteExamPaper(@PathVariable Long id) {
         try {
             boolean success = teacherExamPaperInfoService.deleteExamPaperById(id);
             if (success) {

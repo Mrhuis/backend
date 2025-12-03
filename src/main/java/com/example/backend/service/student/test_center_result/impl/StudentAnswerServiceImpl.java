@@ -112,9 +112,9 @@ public class StudentAnswerServiceImpl extends ServiceImpl<StudentAnswerMapper, S
         int pageIndex = Math.max(page, 1);
         int pageSize = Math.max(size, 1);
 
+        // 查询所有记录（包括is_complete=0和1），用于判断是否有未完成的记录
         QueryWrapper<StudentAnswer> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_key", userKey)
-                .eq("is_complete", 1)
                 .isNotNull("paper_id");
 
         List<StudentAnswer> answers = studentAnswerMapper.selectList(queryWrapper);
@@ -178,24 +178,47 @@ public class StudentAnswerServiceImpl extends ServiceImpl<StudentAnswerMapper, S
             List<StudentAnswer> paperAnswers = entry.getValue();
             ExamPaper examPaper = examPaperMap.get(paperId);
 
+            // 检查是否有is_complete=0的记录
+            boolean hasIncomplete = paperAnswers.stream()
+                    .anyMatch(answer -> answer.getIsComplete() != null && answer.getIsComplete() == 0);
+
             StudentCompletedPaperVO vo = new StudentCompletedPaperVO();
             vo.setPaperId(paperId);
+            
+            // 只统计is_complete=1的记录用于计算得分等
+            List<StudentAnswer> completedAnswers = paperAnswers.stream()
+                    .filter(answer -> answer.getIsComplete() != null && answer.getIsComplete() == 1)
+                    .collect(Collectors.toList());
+            
+            // 题目数：显示所有记录的数量（包括完成和未完成的）
             vo.setQuestionCount(paperAnswers.size());
+            
+            // 完成时间：取所有记录中最新的完成时间
             vo.setCompleteTime(paperAnswers.stream()
                     .map(StudentAnswer::getCompleteTime)
                     .filter(ct -> ct != null)
                     .max(LocalDateTime::compareTo)
                     .orElse(null));
+            
+            // 如果存在未完成的记录
+            if (hasIncomplete) {
+                vo.setGraded(false);
+                vo.setObtainedScore(BigDecimal.ZERO); // 未评分时显示0分
+                vo.setCanViewDetail(false);
+            } else {
+                // 所有记录都已完成
+                boolean graded = completedAnswers.stream().allMatch(answer -> answer.getScore() != null);
+                vo.setGraded(graded);
 
-            boolean graded = paperAnswers.stream().allMatch(answer -> answer.getScore() != null);
-            vo.setGraded(graded);
+                BigDecimal totalScore = completedAnswers.stream()
+                        .map(StudentAnswer::getScore)
+                        .filter(score -> score != null)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                vo.setObtainedScore(totalScore);
+                vo.setCanViewDetail(true);
+            }
 
-            BigDecimal totalScore = paperAnswers.stream()
-                    .map(StudentAnswer::getScore)
-                    .filter(score -> score != null)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            vo.setObtainedScore(totalScore);
-
+            // 设置试卷基本信息
             if (examPaper != null) {
                 vo.setPaperName(examPaper.getPaperName());
                 vo.setSubject(examPaper.getSubject());
