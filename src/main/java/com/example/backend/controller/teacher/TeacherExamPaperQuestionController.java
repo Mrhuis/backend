@@ -3,7 +3,10 @@ package com.example.backend.controller.teacher;
 import com.example.backend.common.Result;
 import com.example.backend.common.vo.QueryListVo;
 import com.example.backend.controller.teacher.dto.*;
+import com.example.backend.controller.teacher.vo.TeacherExamPaperQuestionListVo;
 import com.example.backend.entity.ExamPaperQuestion;
+import com.example.backend.entity.Item;
+import com.example.backend.mapper.ItemsMapper;
 import com.example.backend.service.teacher.test_manage.TeacherExamPaperQuestionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +33,9 @@ public class TeacherExamPaperQuestionController {
     @Autowired
     private TeacherExamPaperQuestionService teacherExamPaperQuestionService;
 
+    @Autowired
+    private ItemsMapper itemsMapper;
+
     /**
      * 获取试卷题目列表（支持分页和查询条件）
      *
@@ -45,13 +51,37 @@ public class TeacherExamPaperQuestionController {
             List<ExamPaperQuestion> examPaperQuestions = teacherExamPaperQuestionService.getExamPaperQuestionList(req);
             log.info("获取到试卷题目列表，数量: {}", examPaperQuestions.size());
 
+            // 转换为VO并填充Item信息
+            List<TeacherExamPaperQuestionListVo> voList = examPaperQuestions.stream().map(question -> {
+                TeacherExamPaperQuestionListVo vo = new TeacherExamPaperQuestionListVo();
+                // 复制ExamPaperQuestion的所有属性
+                vo.setId(question.getId());
+                vo.setPaperId(question.getPaperId());
+                vo.setItemKey(question.getItemKey());
+                vo.setSortNum(question.getSortNum());
+                vo.setActualScore(question.getActualScore());
+                
+                // 查询对应的Item信息
+                if (question.getItemKey() != null) {
+                    try {
+                        Item item = itemsMapper.selectByItemKey(question.getItemKey());
+                        vo.setItem(item);
+                    } catch (Exception e) {
+                        log.warn("查询题目{}的Item信息失败: {}", question.getItemKey(), e.getMessage());
+                        vo.setItem(null);
+                    }
+                }
+                
+                return vo;
+            }).collect(java.util.stream.Collectors.toList());
+
             // 获取总数
             Long total = teacherExamPaperQuestionService.getExamPaperQuestionsCount(req);
             log.info("获取到试卷题目总数: {}", total);
 
             // 构建分页结果
             QueryListVo result = new QueryListVo();
-            result.setRecords(examPaperQuestions.stream().map(question -> (Object) question).collect(java.util.stream.Collectors.toList()));
+            result.setRecords(voList.stream().map(vo -> (Object) vo).collect(java.util.stream.Collectors.toList()));
             result.setTotal(total);
             result.setCurrent(req.getPageIndex() != null ? req.getPageIndex() : 1);
             result.setSize(req.getPageSize() != null ? req.getPageSize() : 100);
@@ -72,7 +102,7 @@ public class TeacherExamPaperQuestionController {
      * @return 添加结果
      */
     @PostMapping("/add")
-    public Result addExamPaperQuestion(@RequestBody TeacherExamPaperQuestionAddDto req) {
+    public Result<String> addExamPaperQuestion(@RequestBody TeacherExamPaperQuestionAddDto req) {
         try {
             boolean success = teacherExamPaperQuestionService.addExamPaperQuestion(req);
             if (success) {
@@ -112,7 +142,7 @@ public class TeacherExamPaperQuestionController {
      * @return 删除结果
      */
     @GetMapping("/delete/{id}")
-    public Result deleteExamPaperQuestion(@PathVariable Long id) {
+    public Result<String> deleteExamPaperQuestion(@PathVariable Long id) {
         try {
             boolean success = teacherExamPaperQuestionService.deleteExamPaperQuestionById(id);
             if (success) {

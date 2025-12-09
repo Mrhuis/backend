@@ -1,6 +1,5 @@
 package com.example.backend.controller.admin.vo;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,6 +34,11 @@ public class AdminUserQueryDetailVo {
      * 登录账号（唯一）
      */
     private String username;
+
+    /**
+     * 登录账号（唯一，直接透出account字段）
+     */
+    private String account;
 
     /**
      * 加密密码（如bcrypt哈希存储）

@@ -7,10 +7,12 @@ import com.example.backend.entity.Class;
 import com.example.backend.entity.ClassStudentEnrollment;
 import com.example.backend.entity.ExamPaper;
 import com.example.backend.entity.ExamPaperDistribution;
+import com.example.backend.entity.StudentAnswer;
 import com.example.backend.mapper.ClassMapper;
 import com.example.backend.mapper.ClassStudentEnrollmentMapper;
 import com.example.backend.mapper.ExamPaperDistributionMapper;
 import com.example.backend.mapper.ExamPaperMapper;
+import com.example.backend.mapper.StudentAnswerMapper;
 import com.example.backend.service.teacher.message_center.TeacherMessageCenterService;
 import com.example.backend.service.teacher.test_manage.TeacherExamPaperDistributionService;
 import org.slf4j.Logger;
@@ -47,6 +49,9 @@ public class TeacherExamPaperDistributionServiceImpl implements TeacherExamPaper
 
     @Autowired
     private ClassMapper classMapper;
+
+    @Autowired
+    private StudentAnswerMapper studentAnswerMapper;
 
     @Autowired
     private TeacherMessageCenterService teacherMessageCenterService;
@@ -269,6 +274,7 @@ public class TeacherExamPaperDistributionServiceImpl implements TeacherExamPaper
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteExamPaperDistributionById(Long id) {
         try {
             // 先查询要删除的试卷下发
@@ -277,10 +283,21 @@ public class TeacherExamPaperDistributionServiceImpl implements TeacherExamPaper
                 throw new RuntimeException("试卷下发记录不存在");
             }
 
+            Long paperId = examPaperDistribution.getPaperId();
+            
+            // 删除该试卷的所有学生答案记录
+            if (paperId != null) {
+                QueryWrapper<StudentAnswer> answerQueryWrapper = new QueryWrapper<>();
+                answerQueryWrapper.eq("paper_id", paperId);
+                int deletedAnswers = studentAnswerMapper.delete(answerQueryWrapper);
+                log.info("删除试卷ID为{}的学生答案记录，共删除{}条", paperId, deletedAnswers);
+            }
+
             // 删除目标试卷下发
             int result = examPaperDistributionMapper.deleteById(id);
             return result > 0;
         } catch (Exception e) {
+            log.error("删除试卷下发失败", e);
             throw new RuntimeException("删除试卷下发失败", e);
         }
     }

@@ -10,4 +10,12 @@ public interface StudentExamPaperService {
      * @return 试卷分配信息列表
      */
     List<StudentExamPaperListVo> getExamPapersByStudentUserKey(String userKey);
+
+    /**
+     * 根据学生userKey和试卷ID检查试卷是否被回收
+     * @param userKey 学生userKey
+     * @param paperId 试卷ID
+     * @return 是否已回收（true-已回收，false-未回收）
+     */
+    boolean isPaperRecycled(String userKey, Long paperId);
 }

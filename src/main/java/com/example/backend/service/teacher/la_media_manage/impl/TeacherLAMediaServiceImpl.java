@@ -69,6 +69,18 @@ public class TeacherLAMediaServiceImpl implements TeacherLAMediaService {
             queryWrapper.like("file_name", req.getFileName());
         }
         
+        // 过滤条件：只显示状态为ENABLED或创建者为当前用户的数据
+        if (req.getUserKey() != null && !req.getUserKey().isEmpty()) {
+            queryWrapper.and(wrapper -> wrapper
+                .eq("status", "ENABLED")
+                .or()
+                .eq("uploaded_by", req.getUserKey())
+            );
+        } else {
+            // 如果没有提供userKey，只显示ENABLED状态的数据
+            queryWrapper.eq("status", "ENABLED");
+        }
+        
         // 默认按ID降序排列
         queryWrapper.orderByDesc("id");
         
@@ -88,6 +100,18 @@ public class TeacherLAMediaServiceImpl implements TeacherLAMediaService {
         
         if (req.getFileName() != null && !req.getFileName().isEmpty()) {
             queryWrapper.like("file_name", req.getFileName());
+        }
+        
+        // 过滤条件：只显示状态为ENABLED或创建者为当前用户的数据
+        if (req.getUserKey() != null && !req.getUserKey().isEmpty()) {
+            queryWrapper.and(wrapper -> wrapper
+                .eq("status", "ENABLED")
+                .or()
+                .eq("uploaded_by", req.getUserKey())
+            );
+        } else {
+            // 如果没有提供userKey，只显示ENABLED状态的数据
+            queryWrapper.eq("status", "ENABLED");
         }
         
         return mediaAssetsMapper.selectCount(queryWrapper);

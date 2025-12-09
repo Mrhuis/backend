@@ -1,6 +1,5 @@
 package com.example.backend.controller.admin;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.backend.common.Result;
 import com.example.backend.common.vo.QueryListVo;
 import com.example.backend.controller.admin.dto.AdminUserAddDto;
@@ -10,13 +9,11 @@ import com.example.backend.controller.admin.vo.AdminSimpleUserVo;
 import com.example.backend.controller.admin.vo.AdminUserBasicInfoVo;
 import com.example.backend.controller.admin.vo.AdminUserQueryDetailVo;
 import com.example.backend.entity.User;
-import com.example.backend.mapper.UserMapper;
 import com.example.backend.service.admin.user_manage.AdminUserManageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,9 +34,6 @@ public class AdminUserManageController {
     
     @Autowired
     private AdminUserManageService adminUserManageService;
-    
-    @Autowired
-    private UserMapper userMapper;
     
     /**
      * 获取用户列表
@@ -63,6 +57,9 @@ public class AdminUserManageController {
             List<AdminUserQueryDetailVo> userVos = users.stream().map(user -> {
                 AdminUserQueryDetailVo vo = new AdminUserQueryDetailVo();
                 BeanUtils.copyProperties(user, vo);
+                // 显示账号：username 与 account 都使用 account 字段
+                vo.setUsername(user.getAccount());
+                vo.setAccount(user.getAccount());
                 return vo;
             }).collect(Collectors.toList());
 
@@ -110,7 +107,7 @@ public class AdminUserManageController {
      * @return 操作结果
      */
     @PostMapping("/add")
-    public Result addUser(@RequestBody AdminUserAddDto req) {
+    public Result<String> addUser(@RequestBody AdminUserAddDto req) {
         try {
             boolean success = adminUserManageService.addUser(req);
             if (success) {
@@ -148,7 +145,7 @@ public class AdminUserManageController {
      * @return 操作结果
      */
     @GetMapping("/delete/{id}")
-    public Result deleteItem(@PathVariable Long id) {
+    public Result<String> deleteItem(@PathVariable Long id) {
         try {
             boolean success = adminUserManageService.deleteUserById(id);
             if (success) {

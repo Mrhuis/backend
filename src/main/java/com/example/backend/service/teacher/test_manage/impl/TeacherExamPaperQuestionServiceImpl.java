@@ -75,10 +75,10 @@ public class TeacherExamPaperQuestionServiceImpl implements TeacherExamPaperQues
 
             log.info("执行试卷题目查询，SQL条件: {}", queryWrapper.getTargetSql());
 
-            List<ExamPaperQuestion> result = examPaperQuestionMapper.selectList(queryWrapper);
-            log.info("查询结果数量: {}", result.size());
+            List<ExamPaperQuestion> questions = examPaperQuestionMapper.selectList(queryWrapper);
+            log.info("查询结果数量: {}", questions.size());
 
-            return result;
+            return questions;
         } catch (Exception e) {
             log.error("获取试卷题目列表失败", e);
             throw new RuntimeException("获取试卷题目列表失败", e);

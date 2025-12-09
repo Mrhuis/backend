@@ -1,13 +1,9 @@
 package com.example.backend.controller.admin.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * ClassName: AdminLAItemUpdateStatusDto
@@ -33,6 +29,9 @@ public class AdminLAItemUpdateStatusDto {
      */
     private String status;  // 全小写，无大写字母，无需加@JsonAlias
 
-
-
+    /**
+     * 审核人标识（可选），前端可能传 reviewerKey
+     */
+    @JsonAlias({"reviewer_key", "reviewerKey"})
+    private String reviewerKey;
 }

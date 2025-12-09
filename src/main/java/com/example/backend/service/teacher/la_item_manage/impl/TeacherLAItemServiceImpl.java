@@ -57,6 +57,18 @@ public class TeacherLAItemServiceImpl implements TeacherLAItemService {
             queryWrapper.like("content", req.getContent());
         }
         
+        // 过滤条件：只显示状态为ENABLED或创建者为当前用户的数据
+        if (req.getUserKey() != null && !req.getUserKey().isEmpty()) {
+            queryWrapper.and(wrapper -> wrapper
+                .eq("status", "ENABLED")
+                .or()
+                .eq("uploaded_by", req.getUserKey())
+            );
+        } else {
+            // 如果没有提供userKey，只显示ENABLED状态的数据
+            queryWrapper.eq("status", "ENABLED");
+        }
+        
         // 默认按ID降序排列
         queryWrapper.orderByDesc("id");
         
@@ -76,6 +88,18 @@ public class TeacherLAItemServiceImpl implements TeacherLAItemService {
         
         if (req.getContent() != null && !req.getContent().isEmpty()) {
             queryWrapper.like("content", req.getContent());
+        }
+        
+        // 过滤条件：只显示状态为ENABLED或创建者为当前用户的数据
+        if (req.getUserKey() != null && !req.getUserKey().isEmpty()) {
+            queryWrapper.and(wrapper -> wrapper
+                .eq("status", "ENABLED")
+                .or()
+                .eq("uploaded_by", req.getUserKey())
+            );
+        } else {
+            // 如果没有提供userKey，只显示ENABLED状态的数据
+            queryWrapper.eq("status", "ENABLED");
         }
         
         return itemsMapper.selectCount(queryWrapper);

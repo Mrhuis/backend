@@ -140,4 +140,21 @@ public class StudentTestCenterDoController {
             return Result.error("检查考试完成状态失败: " + e.getMessage());
         }
     }
+
+    /**
+     * 检查试卷是否被回收
+     *
+     * @param userKey 用户标识
+     * @param paperId 试卷ID
+     * @return 是否已回收（true-已回收，false-未回收）
+     */
+    @GetMapping("/check-paper-recycled")
+    public Result<Boolean> checkPaperRecycled(@RequestParam String userKey, @RequestParam Long paperId) {
+        try {
+            boolean isRecycled = studentExamPaperService.isPaperRecycled(userKey, paperId);
+            return Result.success(isRecycled);
+        } catch (Exception e) {
+            return Result.error("检查试卷回收状态失败: " + e.getMessage());
+        }
+    }
 }

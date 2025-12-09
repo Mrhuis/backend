@@ -29,11 +29,23 @@ public class TeacherKSChapterServiceImpl implements TeacherKSChapterService {
         QueryWrapper<Chapter> queryWrapper = new QueryWrapper<>();
         
         if (req.getKey() != null && !req.getKey().isEmpty()) {
-            queryWrapper.like("key", req.getKey());
+            queryWrapper.like("chapter_key", req.getKey());
         }
         
         if (req.getName() != null && !req.getName().isEmpty()) {
             queryWrapper.like("name", req.getName());
+        }
+        
+        // 过滤条件：只显示状态为ENABLED或创建者为当前用户的数据
+        if (req.getUserKey() != null && !req.getUserKey().isEmpty()) {
+            queryWrapper.and(wrapper -> wrapper
+                .eq("status", "ENABLED")
+                .or()
+                .eq("uploaded_by", req.getUserKey())
+            );
+        } else {
+            // 如果没有提供userKey，只显示ENABLED状态的数据
+            queryWrapper.eq("status", "ENABLED");
         }
         
         // 默认按ID降序排列
@@ -50,11 +62,23 @@ public class TeacherKSChapterServiceImpl implements TeacherKSChapterService {
         QueryWrapper<Chapter> queryWrapper = new QueryWrapper<>();
         
         if (req.getKey() != null && !req.getKey().isEmpty()) {
-            queryWrapper.like("key", req.getKey());
+            queryWrapper.like("chapter_key", req.getKey());
         }
         
         if (req.getName() != null && !req.getName().isEmpty()) {
             queryWrapper.like("name", req.getName());
+        }
+        
+        // 过滤条件：只显示状态为ENABLED或创建者为当前用户的数据
+        if (req.getUserKey() != null && !req.getUserKey().isEmpty()) {
+            queryWrapper.and(wrapper -> wrapper
+                .eq("status", "ENABLED")
+                .or()
+                .eq("uploaded_by", req.getUserKey())
+            );
+        } else {
+            // 如果没有提供userKey，只显示ENABLED状态的数据
+            queryWrapper.eq("status", "ENABLED");
         }
         
         return chapterMapper.selectCount(queryWrapper);

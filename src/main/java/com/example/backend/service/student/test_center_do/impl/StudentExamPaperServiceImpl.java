@@ -90,11 +90,43 @@ public class StudentExamPaperServiceImpl extends ServiceImpl<ClassStudentEnrollm
                 vo.setDeadline(distribution.getDeadline());
                 vo.setRemark(distribution.getRemark());
                 vo.setDistributorId(distribution.getDistributorId());
+                vo.setIsRecycled(distribution.getIsRecycled());
                 
                 result.add(vo);
             }
         }
         
         return result;
+    }
+
+    @Override
+    public boolean isPaperRecycled(String userKey, Long paperId) {
+        // 1. 根据userKey查询学生所属的所有班级
+        List<ClassStudentEnrollment> enrollments = classStudentEnrollmentMapper.selectByUserKey(userKey);
+        
+        if (enrollments.isEmpty()) {
+            return true; // 如果没有班级，认为已回收
+        }
+        
+        // 提取班级classKey列表
+        List<String> classKeys = enrollments.stream()
+                .map(ClassStudentEnrollment::getClassKey)
+                .collect(Collectors.toList());
+        
+        // 2. 根据班级classKey列表和试卷ID查询试卷分配信息
+        List<ExamPaperDistribution> distributions = examPaperDistributionMapper.selectByClassKeys(classKeys);
+        
+        // 查找匹配的试卷分配记录
+        ExamPaperDistribution distribution = distributions.stream()
+                .filter(d -> d.getPaperId().equals(paperId))
+                .findFirst()
+                .orElse(null);
+        
+        if (distribution == null) {
+            return true; // 如果没有找到分配记录，认为已回收
+        }
+        
+        // 返回回收状态（1表示已回收，0表示未回收）
+        return distribution.getIsRecycled() != null && distribution.getIsRecycled() == 1;
     }
 }
